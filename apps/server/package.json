@@ -7,8 +7,7 @@
     "build": "tsc",
     "dev": "bun --watch run src/index.ts && tsc --watch",
     "type-check": "tsc --noEmit",
-    "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "lint": "eslint src/ --max-warnings 0"
+    "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "dependencies": {
     "@effect/platform": "^0.88.2",
@@ -17,9 +16,7 @@
   },
   "devDependencies": {
     "@repo/config-typescript": "*",
-    "@repo/config-eslint": "*",
     "@repo/domain": "*",
-    "@types/bun": "1.2.18",
-    "eslint": "^9.31.0"
+    "@types/bun": "1.2.18"
   }
 }

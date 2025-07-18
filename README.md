@@ -10,8 +10,10 @@ but the addition of Effect and Turborepo.
 - **Shared Domain**: Common types and utilities across all apps
 - **Effect Integration**: Built for composable, functional programming with
   [Effect](https://effect.website)
-- **Modern Tooling**: Turborepo, Bun, Vite, and React
-- **Zero Config**: ESLint, TypeScript, and Prettier pre-configured
+- **Modern Tooling**: [Turborepo](https://turbo.build/), [Bun](https://bun.sh/),
+  [Vite](https://vitejs.dev/), and [React](https://react.dev/)
+- **Zero Config**: Pre-configured [Ultracite](https://www.ultracite.ai/) for
+  linting and formatting with [Biome](https://biomejs.dev)
 - **Flexible Deployment**: Deploy anywhere without vendor lock-in
 
 ## Quick Start
@@ -27,6 +29,18 @@ bun dev
 bun build
 ```
 
+### Formatting and Linting
+
+Format and lint the codebase using Ultracite:
+
+```bash
+# Format code
+bun format
+
+# Lint code
+bun lint
+```
+
 ## Project Structure
 
 ```txt
@@ -35,7 +49,6 @@ bun build
 │   ├── client/             # React frontend (Vite + React)
 │   └── server/             # Bun + Effect backend API
 ├── packages/
-│   ├── config-eslint/      # ESLint configurations
 │   ├── config-typescript/  # TypeScript configurations
 │   └── domain/             # Shared Schema definitions
 ├── package.json            # Root package.json with workspaces
@@ -53,9 +66,8 @@ bun build
 
 | Package                   | Description                                                                                                        |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `@repo/domain`            | Shared Schema definitions using [Effect Schema](https://effect.website/docs/schema) used by both client and server |
-| `@repo/config-eslint`     | ESLint configurations (includes `eslint-config-next` and `eslint-config-prettier`)                                 |
 | `@repo/config-typescript` | TypeScript configurations used throughout the monorepo                                                             |
+| `@repo/domain`            | Shared Schema definitions using [Effect Schema](https://effect.website/docs/schema) used by both client and server |
 
 ## Development
 

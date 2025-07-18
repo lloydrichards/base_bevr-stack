@@ -1,21 +1,17 @@
 {
   "extends": "@repo/config-typescript/base.json",
   "compilerOptions": {
-    // Environment settings
     "lib": ["ESNext"],
     "target": "ESNext",
     "module": "ESNext",
     "jsx": "react-jsx",
 
-    // Types
     "types": ["bun-types"],
 
-    // Output settings
     "declaration": true,
     "outDir": "dist",
     "noEmit": false,
 
-    // Module resolution
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": false
   },

@@ -6,8 +6,8 @@ import {
   HttpServer,
 } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
-import { Effect, Layer, Schema } from "effect";
 import { ApiResponse } from "@repo/domain";
+import { Effect, Layer, Schema } from "effect";
 
 // Define Domain of API
 class HealthGroup extends HttpApiGroup.make("health")

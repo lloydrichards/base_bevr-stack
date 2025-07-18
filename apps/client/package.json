@@ -7,8 +7,7 @@
     "build": "vite build",
     "dev": "vite --host 0.0.0.0 --port 3001 --clearScreen false",
     "type-check": "tsc --noEmit",
-    "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "lint": "eslint src/ --max-warnings 0"
+    "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.11",
@@ -25,12 +24,10 @@
   },
   "devDependencies": {
     "@repo/config-typescript": "*",
-    "@repo/config-eslint": "*",
     "@repo/domain": "*",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.7.0",
-    "eslint": "^9.31.0",
     "typescript": "~5.8.3",
     "vite": "^7.0.5"
   }

@@ -1,11 +1,11 @@
+import { ApiResponse } from "@repo/domain";
+import { Schema } from "effect";
 import { useState } from "react";
 import bun from "./assets/bun.svg";
 import effect from "./assets/effect.svg";
 import react from "./assets/react.svg";
 import vite from "./assets/vite.svg";
-import { ApiResponse } from "@repo/domain";
 import { Button } from "./components/ui/button";
-import { Schema } from "effect";
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
 
@@ -18,27 +18,27 @@ function App() {
       const res = Schema.decodeUnknownSync(ApiResponse)(await req.json());
       setData(res);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col gap-6 items-center justify-center min-h-screen">
+    <div className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-6">
       <div className="flex items-center gap-6">
-        <img src={bun} className="w-16 h-16" alt="Bun logo" />
-        <img src={effect} className="w-16 h-16" alt="Effect logo" />
-        <img src={vite} className="w-16 h-16" alt="Vite logo" />
-        <img src={react} className="w-16 h-16" alt="React logo" />
+        <img alt="Bun logo" className="h-16 w-16" src={bun} />
+        <img alt="Effect logo" className="h-16 w-16" src={effect} />
+        <img alt="Vite logo" className="h-16 w-16" src={vite} />
+        <img alt="React logo" className="h-16 w-16" src={react} />
       </div>
 
-      <h1 className="text-5xl font-black">bEvr</h1>
-      <h2 className="text-2xl font-bold">Bun + Effect + Vite + React</h2>
+      <h1 className="font-black text-5xl ">bEvr</h1>
+      <h2 className="font-bold text-2xl">Bun + Effect + Vite + React</h2>
       <p>A typesafe fullstack monorepo</p>
       <div className="flex items-center gap-4">
         <Button onClick={sendRequest}>Call API</Button>
       </div>
       {data && (
-        <pre className="bg-gray-100 p-4 rounded-md">
+        <pre className="rounded-md bg-gray-100 p-4">
           <code>
             Message: {data.message} <br />
             Success: {data.success.toString()}

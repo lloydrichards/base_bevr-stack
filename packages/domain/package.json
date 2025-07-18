@@ -7,14 +7,12 @@
   },
   "scripts": {
     "type-check": "tsc --noEmit",
-    "clean": "git clean -xdf .cache .turbo dist node_modules",
-    "lint": "eslint src/"
+    "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "dependencies": {
     "effect": "^3.16.16"
   },
   "devDependencies": {
-    "@repo/config-eslint": "*",
     "@repo/config-typescript": "*"
   }
 }
