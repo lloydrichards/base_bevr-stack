@@ -11,7 +11,8 @@
     "lint": "eslint src/ --max-warnings 0"
   },
   "dependencies": {
-    "hono": "^4.8.5",
+    "@effect/platform": "^0.88.2",
+    "@effect/platform-bun": "^0.74.0",
     "effect": "3.16.16"
   },
   "devDependencies": {

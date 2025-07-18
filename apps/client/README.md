@@ -1,7 +1,7 @@
 # Client App
 
 React frontend built with Vite and TypeScript, part of the
-[bhEvr stack](../../README.md).
+[bEvr stack](../../README.md).
 
 ## Stack
 
@@ -48,4 +48,4 @@ const res = Schema.decodeUnknownSync(ApiResponse)(await req.json());
 
 - [React Documentation](https://react.dev)
 - [Vite Documentation](https://vitejs.dev)
-- [bhevr Stack Overview](../../README.md)
+- [bEvr Stack Overview](../../README.md)

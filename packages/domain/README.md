@@ -1,6 +1,6 @@
 # @repo/domain
 
-Shared types and schemas for the [bhEvr stack](../../README.md), built with
+Shared types and schemas for the [bEvr stack](../../README.md), built with
 Effect Schema.
 
 ## Overview
@@ -44,4 +44,4 @@ src/
 ## Learn More
 
 - [Effect Schema Documentation](https://effect.website/docs/schema)
-- [bhEvr Stack Overview](../../README.md)
+- [bEvr Stack Overview](../../README.md)

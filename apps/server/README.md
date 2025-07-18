@@ -1,13 +1,13 @@
 # Server API
 
-Hono backend API with TypeScript, part of the [bhEvr stack](../../README.md).
+[Effect Platform](https://effect.website/docs/platform) backend API with
+TypeScript, part of the [bEvr stack](../../README.md).
 
 ## Stack
 
-- **Hono** - Fast web framework
+- **Effect Platform** - Api framework
 - **Bun** - JavaScript runtime
 - **TypeScript** - Type safety
-- **Effect** - Functional programming utilities
 - **@repo/domain** - Shared types and schemas
 
 ## Getting Started
@@ -26,7 +26,8 @@ The API runs on `http://localhost:3000` in development.
 
 ## Architecture
 
-The server uses Hono for its simplicity and ecosystem of plugins:
+The server uses Effect Platform HTTP API for type-safe, functional HTTP
+handling:
 
 - **Type-safe Routes**: Shared types from `@repo/domain`
 - **CORS Support**: Pre-configured for client communication
@@ -36,25 +37,28 @@ The server uses Hono for its simplicity and ecosystem of plugins:
 ## Example Route
 
 ```typescript
-import { Hono } from "hono";
-import { Schema } from "@effect/schema";
 import { ApiResponse } from "@repo/domain";
 
-const app = new Hono();
+// Define API Group
+class HelloGroup extends HttpApiGroup.make("hello")
+  .add(HttpApiEndpoint.get("get", "/").addSuccess(ApiResponse))
+  .prefix("/hello") {}
 
-app.get("/hello", async (c) => {
-  const data: typeof ApiResponse.Type = {
-    message: "Hello bhEvr!",
-    success: true,
-  };
+const Api = HttpApi.make("Api").add(HelloGroup);
 
-  // Encode the data using Effect Schema
-  return c.json(Schema.encodeSync(ApiResponse)(data), { status: 200 });
-});
+// Define Live Handler
+const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
+  handlers.handle("get", () => {
+    const data: typeof ApiResponse.Type = {
+      message: "Hello bhEvr!",
+      success: true,
+    };
+    return Effect.succeed(data);
+  })
+);
 ```
 
 ## Learn More
 
-- [Hono Documentation](https://hono.dev)
 - [Effect Documentation](https://effect.website)
-- [bhEvr Stack Overview](../../README.md)
+- [bEvr Stack Overview](../../README.md)

@@ -1,8 +1,8 @@
-# bhEvr Stack
+# bEvr Stack
 
 A modern full-stack TypeScript monorepo with end-to-end type safety, using Bun,
-Hono, Effect, Vite, and React. Heavily inspired by the [bhvr](https://bhvr.dev/)
-stack but the addition of Effect and Turborepo.
+Effect, Vite, and React. Heavily inspired by the [bhvr](https://bhvr.dev/) stack
+but the addition of Effect and Turborepo.
 
 ## Features
 
@@ -10,7 +10,7 @@ stack but the addition of Effect and Turborepo.
 - **Shared Domain**: Common types and utilities across all apps
 - **Effect Integration**: Built for composable, functional programming with
   [Effect](https://effect.website)
-- **Modern Tooling**: Turborepo, Bun, Hono, Vite, and React
+- **Modern Tooling**: Turborepo, Bun, Vite, and React
 - **Zero Config**: ESLint, TypeScript, and Prettier pre-configured
 - **Flexible Deployment**: Deploy anywhere without vendor lock-in
 
@@ -33,7 +33,7 @@ bun build
 .
 ├── apps/
 │   ├── client/             # React frontend (Vite + React)
-│   └── server/             # Hono backend API
+│   └── server/             # Bun + Effect backend API
 ├── packages/
 │   ├── config-eslint/      # ESLint configurations
 │   ├── config-typescript/  # TypeScript configurations
@@ -47,7 +47,7 @@ bun build
 | App      | Description                                                            |
 | -------- | ---------------------------------------------------------------------- |
 | `client` | A [React](https://react.dev) app built with [Vite](https://vitejs.dev) |
-| `server` | A [Hono](https://hono.dev) backend API                                 |
+| `server` | A [Effect Platform](https://effect.website) backend API built          |
 
 ### Packages
 
@@ -82,5 +82,4 @@ import { ApiResponse } from "@repo/domain";
 
 - [Turborepo](https://turborepo.com/docs)
 - [Effect](https://effect.website/docs/introduction)
-- [Hono](https://hono.dev/docs)
 - [Vite](https://vitejs.dev/guide/)

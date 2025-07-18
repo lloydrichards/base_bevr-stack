@@ -1,7 +1,6 @@
 import { useState } from "react";
 import bun from "./assets/bun.svg";
 import effect from "./assets/effect.svg";
-import hono from "./assets/hono.svg";
 import react from "./assets/react.svg";
 import vite from "./assets/vite.svg";
 import { ApiResponse } from "@repo/domain";
@@ -27,14 +26,13 @@ function App() {
     <div className="max-w-xl mx-auto flex flex-col gap-6 items-center justify-center min-h-screen">
       <div className="flex items-center gap-6">
         <img src={bun} className="w-16 h-16" alt="Bun logo" />
-        <img src={hono} className="w-16 h-16" alt="Hono logo" />
         <img src={effect} className="w-16 h-16" alt="Effect logo" />
         <img src={vite} className="w-16 h-16" alt="Vite logo" />
         <img src={react} className="w-16 h-16" alt="React logo" />
       </div>
 
-      <h1 className="text-5xl font-black">bhEvr</h1>
-      <h2 className="text-2xl font-bold">Bun + Hono + Effect + Vite + React</h2>
+      <h1 className="text-5xl font-black">bEvr</h1>
+      <h2 className="text-2xl font-bold">Bun + Effect + Vite + React</h2>
       <p>A typesafe fullstack monorepo</p>
       <div className="flex items-center gap-4">
         <Button onClick={sendRequest}>Call API</Button>

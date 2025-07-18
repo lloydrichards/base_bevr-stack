@@ -1,22 +1,53 @@
-import { Hono } from "hono";
-import { cors } from "hono/cors";
+import {
+  HttpApi,
+  HttpApiBuilder,
+  HttpApiEndpoint,
+  HttpApiGroup,
+  HttpServer,
+} from "@effect/platform";
+import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
+import { Effect, Layer, Schema } from "effect";
 import { ApiResponse } from "@repo/domain";
-import { Schema } from "effect";
 
-export const app = new Hono()
+// Define Domain of API
+class HealthGroup extends HttpApiGroup.make("health")
+  .add(HttpApiEndpoint.get("get", "/").addSuccess(Schema.String))
+  .prefix("/") {}
 
-  .use(cors())
+class HelloGroup extends HttpApiGroup.make("hello")
+  .add(HttpApiEndpoint.get("get", "/").addSuccess(ApiResponse))
+  .prefix("/hello") {}
 
-  .get("/", (c) => {
-    return c.text("Hello Hono!");
-  })
+const Api = HttpApi.make("Api").add(HealthGroup).add(HelloGroup);
 
-  .get("/hello", async (c) => {
+// Define Live API Handlers
+const HealthGroupLive = HttpApiBuilder.group(Api, "health", (handlers) =>
+  handlers.handle("get", () => Effect.succeed("Hello Effect!"))
+);
+const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
+  handlers.handle("get", () => {
     const data: typeof ApiResponse.Type = {
-      message: "Hello bhEvr!",
+      message: "Hello bEvr!",
       success: true,
     };
-    return c.json(Schema.encodeSync(ApiResponse)(data), { status: 200 });
-  });
+    return Effect.succeed(data);
+  })
+);
 
-export default app;
+// Define Live API
+const ApiLive = HttpApiBuilder.api(Api).pipe(
+  Layer.provide(Layer.merge(HealthGroupLive, HelloGroupLive))
+);
+
+const HttpLive = HttpApiBuilder.serve().pipe(
+  HttpServer.withLogAddress,
+  Layer.provide(HttpApiBuilder.middlewareCors()),
+  Layer.provideMerge(ApiLive),
+  Layer.provideMerge(
+    BunHttpServer.layer({
+      port: 3000,
+    })
+  )
+);
+
+BunRuntime.runMain(Layer.launch(HttpLive));

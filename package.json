@@ -1,5 +1,5 @@
 {
-  "name": "base_bhevr-stack",
+  "name": "base_bevr-stack",
   "private": true,
   "scripts": {
     "build": "turbo run build",
