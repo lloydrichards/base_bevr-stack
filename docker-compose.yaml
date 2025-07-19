@@ -1,0 +1,31 @@
+name: bevr-app
+services:
+  server:
+    build:
+      context: .
+      dockerfile: ./apps/server/Dockerfile
+      args:
+        SERVER_HOST: ${SERVER_HOST}
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+    networks:
+      - bevr-app
+
+  client:
+    build:
+      context: .
+      dockerfile: ./apps/client/Dockerfile
+      args:
+        SERVER_HOST: ${SERVER_HOST}
+        SERVER_PORT: ${SERVER_PORT}
+        CLIENT_PORT: ${CLIENT_PORT}
+    ports:
+      - "${CLIENT_PORT}:${CLIENT_PORT}"
+    networks:
+      - bevr-app
+    depends_on:
+      - server
+
+networks:
+  bevr-app:
+    driver: bridge

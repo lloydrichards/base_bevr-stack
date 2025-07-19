@@ -27,6 +27,8 @@ out/
 build
 dist
 
+# Docker
+
 
 # Debug
 npm-debug.log*
