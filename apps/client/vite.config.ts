@@ -11,4 +11,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ["@repo/domain"],
+  },
+  server: {
+    strictPort: true,
+    host: "127.0.0.1",
+    port: 9000,
+  },
 });

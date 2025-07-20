@@ -1,9 +1,12 @@
 {
   "extends": "@repo/config-typescript/base.json",
   "compilerOptions": {
-    "sourceMap": true,
-    "types": ["node"]
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "noEmit": false,
+    "incremental": true
   },
-  "include": ["."],
+  "include": ["src"],
   "exclude": ["dist", "build", "node_modules"]
 }

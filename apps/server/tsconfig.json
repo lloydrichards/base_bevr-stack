@@ -1,26 +1,16 @@
 {
   "extends": "@repo/config-typescript/base.json",
   "compilerOptions": {
-    "lib": ["ESNext"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "jsx": "react-jsx",
-
-    "types": ["bun-types"],
-
-    "declaration": true,
     "outDir": "dist",
-    "noEmit": false,
-
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": false,
-
+    "noEmit": true,
+    "types": ["bun-types"],
     "plugins": [
       {
         "name": "@effect/language-service"
       }
     ]
   },
+  "references": [{ "path": "../../packages/domain" }],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

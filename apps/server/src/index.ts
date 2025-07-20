@@ -7,7 +7,7 @@ import {
 } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { ApiResponse } from "@repo/domain";
-import { Effect, Layer, Schema } from "effect";
+import { Config, Effect, Layer, Schema } from "effect";
 
 // Define Domain of API
 class HealthGroup extends HttpApiGroup.make("health")
@@ -39,15 +39,15 @@ const ApiLive = HttpApiBuilder.api(Api).pipe(
   Layer.provide(Layer.merge(HealthGroupLive, HelloGroupLive))
 );
 
+const ServerConfig = Config.all({
+  port: Config.number("SERVER_PORT").pipe(Config.withDefault(9000)),
+});
+
 const HttpLive = HttpApiBuilder.serve().pipe(
   HttpServer.withLogAddress,
   Layer.provide(HttpApiBuilder.middlewareCors()),
   Layer.provideMerge(ApiLive),
-  Layer.provideMerge(
-    BunHttpServer.layer({
-      port: 3000,
-    })
-  )
+  Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig))
 );
 
 BunRuntime.runMain(Layer.launch(HttpLive));

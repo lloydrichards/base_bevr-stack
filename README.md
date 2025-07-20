@@ -51,6 +51,7 @@ bun lint
 ├── packages/
 │   ├── config-typescript/  # TypeScript configurations
 │   └── domain/             # Shared Schema definitions
+├── docker-compose.yaml     # Docker Compose configuration for deployment
 ├── package.json            # Root package.json with workspaces
 └── turbo.json              # Turborepo configuration
 ```
@@ -81,6 +82,22 @@ bun dev --filter=server
 # Build all apps
 bun run build
 ```
+
+## Deployment
+
+To run the application using Docker, you can use the provided
+`docker-compose.yaml` file.
+
+First, ensure you have Docker and Docker Compose installed on your system.
+
+Then, run the following command to build and start the services in the
+background:
+
+```bash
+docker-compose up -d --build
+```
+
+This will start the `client` and `server` applications.
 
 ## Type Safety
 
