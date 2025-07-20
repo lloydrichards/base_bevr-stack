@@ -12,6 +12,12 @@
   "linter": {
     "rules": {
       "style": {
+        "useFilenamingConvention": {
+          "level": "warn",
+          "options": {
+            "filenameCases": ["kebab-case", "PascalCase"]
+          }
+        },
         "noNonNullAssertion": "off"
       },
       "suspicious": {

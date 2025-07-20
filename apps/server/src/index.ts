@@ -1,24 +1,7 @@
-import {
-  HttpApi,
-  HttpApiBuilder,
-  HttpApiEndpoint,
-  HttpApiGroup,
-  HttpServer,
-} from "@effect/platform";
+import { HttpApiBuilder, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
-import { ApiResponse } from "@repo/domain";
-import { Config, Effect, Layer, Schema } from "effect";
-
-// Define Domain of API
-class HealthGroup extends HttpApiGroup.make("health")
-  .add(HttpApiEndpoint.get("get", "/").addSuccess(Schema.String))
-  .prefix("/") {}
-
-class HelloGroup extends HttpApiGroup.make("hello")
-  .add(HttpApiEndpoint.get("get", "/").addSuccess(ApiResponse))
-  .prefix("/hello") {}
-
-const Api = HttpApi.make("Api").add(HealthGroup).add(HelloGroup);
+import { Api, type ApiResponse } from "@repo/domain";
+import { Config, Effect, Layer } from "effect";
 
 // Define Live API Handlers
 const HealthGroupLive = HttpApiBuilder.group(Api, "health", (handlers) =>

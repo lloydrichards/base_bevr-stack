@@ -11,6 +11,7 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "dependencies": {
+    "@effect/platform": "^0.88.2",
     "effect": "^3.16.16"
   },
   "devDependencies": {
