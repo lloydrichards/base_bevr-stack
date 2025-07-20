@@ -40,7 +40,7 @@ const ApiLive = HttpApiBuilder.api(Api).pipe(
 );
 
 const ServerConfig = Config.all({
-  port: Config.number("SERVER_PORT").pipe(Config.withDefault(9000)),
+  port: Config.number("PORT").pipe(Config.withDefault(9000)),
 });
 
 const HttpLive = HttpApiBuilder.serve().pipe(

@@ -23,8 +23,6 @@ RUN bun run build --filter=server...
 FROM base AS runner
 WORKDIR /app
 
-ARG SERVER_PORT=9000
-ENV SERVER_PORT=${SERVER_PORT}
 ENV NODE_ENV production
 
 RUN addgroup --system --gid 1001 nodejs
@@ -33,8 +31,5 @@ USER server
 
 COPY --from=builder /app/apps/server/dist/index.js ./server/index.js
 COPY --from=builder /app/apps/server/package.json ./server/package.json
-
-
-EXPOSE ${SERVER_PORT}
 
 CMD ["bun", "run", "./server/index.js"]

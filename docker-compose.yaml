@@ -15,11 +15,8 @@ services:
     build:
       context: .
       dockerfile: ./apps/client/Dockerfile
-      args:
-        SERVER_URL: ${SERVER_URL}
-        SERVER_HOST: ${SERVER_HOST}
-        SERVER_PORT: ${SERVER_PORT}
-        CLIENT_PORT: ${CLIENT_PORT}
+    environment:
+      PORT: ${SERVER_PORT}
     ports:
       - "${CLIENT_PORT}:80"
     networks:
