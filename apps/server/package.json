@@ -4,20 +4,24 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
-    "dev": "bun --watch run src/index.ts && tsc --watch",
+    "build": "bun build src/index.ts --outdir=dist --target=bun --minify",
+    "build:types": "tsc --emitDeclarationOnly",
+    "dev": "bun --watch run src/index.ts",
+    "test": "vitest run",
     "type-check": "tsc --noEmit",
     "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "dependencies": {
     "@effect/platform": "^0.88.2",
     "@effect/platform-bun": "^0.74.0",
+    "@repo/domain": "workspace:*",
     "effect": "3.16.16"
   },
   "devDependencies": {
     "@effect/language-service": "^0.27.2",
-    "@repo/config-typescript": "*",
-    "@repo/domain": "*",
-    "@types/bun": "1.2.18"
+    "@effect/vitest": "^0.24.1",
+    "@repo/config-typescript": "workspace:*",
+    "@types/bun": "1.2.18",
+    "vitest": "^3.2.4"
   }
 }

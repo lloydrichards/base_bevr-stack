@@ -3,12 +3,13 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
+    "clean": "turbo run clean && git clean -xdf node_modules",
     "dev": "turbo run dev",
     "lint": "ultracite lint",
-    "clean": "turbo run clean && git clean -xdf node_modules",
-    "type-check": "turbo run type-check",
     "format": "biome check --write",
-    "format:check": "biome check"
+    "format:check": "biome check",
+    "test": "turbo run test",
+    "type-check": "turbo run type-check"
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.2",

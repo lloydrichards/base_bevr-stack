@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "dev": "vite --host 0.0.0.0 --port 3001 --clearScreen false",
+    "clean": "git clean -xdf .cache .turbo dist node_modules",
+    "dev": "vite --port 3000 --host --clearScreen false",
+    "test": "vitest run",
     "type-check": "tsc --noEmit",
-    "clean": "git clean -xdf .cache .turbo dist node_modules"
+    "preview": "vite preview"
   },
   "dependencies": {
+    "@repo/domain": "workspace:*",
     "@tailwindcss/vite": "^4.1.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -24,8 +27,7 @@
   },
   "devDependencies": {
     "@effect/language-service": "^0.27.2",
-    "@repo/config-typescript": "*",
-    "@repo/domain": "*",
+    "@repo/config-typescript": "workspace:*",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.7.0",

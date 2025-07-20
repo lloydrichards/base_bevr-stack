@@ -27,6 +27,8 @@ out/
 build
 dist
 
+# Docker
+
 
 # Debug
 npm-debug.log*
@@ -36,3 +38,4 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+tsconfig.tsbuildinfo
