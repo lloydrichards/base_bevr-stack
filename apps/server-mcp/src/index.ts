@@ -53,7 +53,7 @@ const ToolLayer = McpServer.toolkit(AiTools).pipe(
       Effect.succeed({
         GetDadJoke: ({ searchTerm }) =>
           Effect.succeed(
-            `Here's a dad joke about ${searchTerm}: Why did the scarecrow win an award? Because he was outstanding in his field!`
+            `Here's a dad joke about ${searchTerm}: Why don't ${searchTerm}s ever get lost? Because they always follow the map!`
           ),
         // add implementation for more tools here
       })
@@ -65,7 +65,7 @@ const ToolLayer = McpServer.toolkit(AiTools).pipe(
 const McpLive = Layer.mergeAll(ResourceLayer, PromptLayer, ToolLayer);
 
 const ServerConfig = Config.all({
-  port: Config.number("PORT").pipe(Config.withDefault(9009)),
+  port: Config.number("MCP_PORT").pipe(Config.withDefault(9009)),
 });
 
 const HttpLive = HttpRouter.Default.serve().pipe(
