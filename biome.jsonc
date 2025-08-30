@@ -1,6 +1,9 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
   "extends": ["ultracite"],
+  "files": {
+    "includes": ["!*.lock"]
+  },
   "formatter": {
     "enabled": true
   },
@@ -12,6 +15,7 @@
   "linter": {
     "rules": {
       "style": {
+        "noMagicNumbers": "off",
         "useFilenamingConvention": {
           "level": "warn",
           "options": {

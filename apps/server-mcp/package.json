@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "server-mcp",
   "version": "0.0.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -7,11 +7,13 @@
     "build": "bun build src/index.ts --outdir=dist --target=bun --minify",
     "build:types": "tsc --emitDeclarationOnly",
     "dev": "bun --watch run src/index.ts",
+    "inspector": "bun run dev & sleep 2 && npx @modelcontextprotocol/inspector; kill %1",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
     "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "dependencies": {
+    "@effect/ai": "^0.26.0",
     "@effect/platform": "^0.90.0",
     "@effect/platform-bun": "^0.79.0",
     "@repo/domain": "workspace:*",

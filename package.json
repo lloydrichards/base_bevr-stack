@@ -12,15 +12,15 @@
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.1.2",
+    "@biomejs/biome": "2.2.2",
     "turbo": "^2.5.5",
-    "typescript": "5.8.3",
-    "ultracite": "5.0.39"
+    "typescript": "5.9.2",
+    "ultracite": "5.2.10"
   },
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "bun@1.2.18",
+  "packageManager": "bun@1.2.21",
   "workspaces": [
     "apps/*",
     "packages/*"
