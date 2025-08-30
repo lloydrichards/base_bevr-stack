@@ -2,7 +2,8 @@
 
 A modern full-stack TypeScript monorepo with end-to-end type safety, using Bun,
 Effect, Vite, and React. Heavily inspired by the [bhvr](https://bhvr.dev/) stack
-but the addition of Effect and Turborepo.
+but the addition of Effect and Turborepo. Includes a Model Context Protocol
+(MCP) server for AI assistant integrations.
 
 ## Features
 
@@ -10,6 +11,8 @@ but the addition of Effect and Turborepo.
 - **Shared Domain**: Common types and utilities across all apps
 - **Effect Integration**: Built for composable, functional programming with
   [Effect](https://effect.website)
+- **MCP Server**: [Model Context Protocol](https://modelcontextprotocol.io/)
+  server for AI assistant tools and resources
 - **Modern Tooling**: [Turborepo](https://turbo.build/), [Bun](https://bun.sh/),
   [Vite](https://vitejs.dev/), and [React](https://react.dev/)
 - **Zero Config**: Pre-configured [Ultracite](https://www.ultracite.ai/) for
@@ -47,7 +50,8 @@ bun lint
 .
 ├── apps/
 │   ├── client/             # React frontend (Vite + React)
-│   └── server/             # Bun + Effect backend API
+│   ├── server/             # Bun + Effect backend API
+│   └── server-mcp/         # Model Context Protocol server
 ├── packages/
 │   ├── config-typescript/  # TypeScript configurations
 │   └── domain/             # Shared Schema definitions
@@ -58,10 +62,11 @@ bun lint
 
 ### Apps
 
-| App      | Description                                                            |
-| -------- | ---------------------------------------------------------------------- |
-| `client` | A [React](https://react.dev) app built with [Vite](https://vitejs.dev) |
-| `server` | A [Effect Platform](https://effect.website) backend API built          |
+| App          | Description                                                                                                     |
+| ------------ | --------------------------------------------------------------------------------------------------------------- |
+| `client`     | A [React](https://react.dev) app built with [Vite](https://vitejs.dev)                                          |
+| `server`     | A [Effect Platform](https://effect.website) backend API                                                         |
+| `server-mcp` | A [Model Context Protocol](https://modelcontextprotocol.io/) server built with [Effect](https://effect.website) |
 
 ### Packages
 
@@ -78,9 +83,13 @@ bun dev
 # Run specific app
 bun dev --filter=client
 bun dev --filter=server
+bun dev --filter=server-mcp
 
 # Build all apps
 bun run build
+
+# Test MCP server functionality
+bun inspector --filter=server-mcp
 ```
 
 ## Deployment
