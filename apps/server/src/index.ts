@@ -1,6 +1,6 @@
 import { HttpApiBuilder, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
-import { Api, type ApiResponse } from "@repo/domain";
+import { Api, type ApiResponse } from "@repo/domain/Api";
 import { Config, Effect, Layer } from "effect";
 
 // Define Live API Handlers

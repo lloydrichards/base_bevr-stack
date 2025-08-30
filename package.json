@@ -5,7 +5,7 @@
     "build": "turbo run build",
     "clean": "turbo run clean && git clean -xdf node_modules",
     "dev": "turbo run dev",
-    "lint": "ultracite lint",
+    "lint": "biome lint",
     "format": "biome check --write",
     "format:check": "biome check",
     "test": "turbo run test",
@@ -13,9 +13,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.2",
-    "turbo": "^2.5.5",
+    "turbo": "^2.5.6",
     "typescript": "5.9.2",
-    "ultracite": "5.2.10"
+    "ultracite": "5.2.14"
   },
   "engines": {
     "node": ">=18"

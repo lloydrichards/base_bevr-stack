@@ -4,6 +4,9 @@
   "extends": "//",
   "linter": {
     "rules": {
+      "suspicious": {
+        "noUnknownAtRules": "off"
+      },
       "performance": {
         "noImgElement": "off"
       }

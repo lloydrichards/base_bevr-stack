@@ -5,9 +5,9 @@
       "name": "base_bevr-stack",
       "devDependencies": {
         "@biomejs/biome": "2.2.2",
-        "turbo": "^2.5.5",
+        "turbo": "^2.5.6",
         "typescript": "5.9.2",
-        "ultracite": "5.2.10",
+        "ultracite": "5.2.14",
       },
     },
     "apps/client": {
@@ -15,40 +15,40 @@
       "version": "0.0.0",
       "dependencies": {
         "@repo/domain": "workspace:*",
-        "@tailwindcss/vite": "^4.1.11",
+        "@tailwindcss/vite": "^4.1.12",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "effect": "3.17.9",
         "lucide-react": "^0.542.0",
-        "radix-ui": "^1.4.2",
-        "react": "^19.1.0",
-        "react-dom": "^19.1.0",
+        "radix-ui": "^1.4.3",
+        "react": "^19.1.1",
+        "react-dom": "^19.1.1",
         "tailwind-merge": "^3.3.1",
-        "tailwindcss": "^4.1.11",
+        "tailwindcss": "^4.1.12",
         "tw-animate-css": "1.3.7",
       },
       "devDependencies": {
         "@effect/language-service": "^0.36.0",
         "@repo/config-typescript": "workspace:*",
-        "@types/react": "^19.1.8",
-        "@types/react-dom": "^19.1.6",
+        "@types/react": "^19.1.12",
+        "@types/react-dom": "^19.1.9",
         "@vitejs/plugin-react": "^5.0.2",
         "typescript": "~5.9.2",
-        "vite": "^7.0.6",
+        "vite": "^7.1.3",
       },
     },
     "apps/server": {
       "name": "server",
       "version": "0.0.1",
       "dependencies": {
-        "@effect/platform": "^0.90.0",
+        "@effect/platform": "^0.90.6",
         "@effect/platform-bun": "^0.79.0",
         "@repo/domain": "workspace:*",
         "effect": "3.17.9",
       },
       "devDependencies": {
         "@effect/language-service": "^0.36.0",
-        "@effect/vitest": "^0.25.0",
+        "@effect/vitest": "^0.25.1",
         "@repo/config-typescript": "workspace:*",
         "@types/bun": "1.2.21",
         "vitest": "^3.2.4",
@@ -59,14 +59,14 @@
       "version": "0.0.1",
       "dependencies": {
         "@effect/ai": "^0.26.0",
-        "@effect/platform": "^0.90.0",
+        "@effect/platform": "^0.90.6",
         "@effect/platform-bun": "^0.79.0",
         "@repo/domain": "workspace:*",
         "effect": "3.17.9",
       },
       "devDependencies": {
         "@effect/language-service": "^0.36.0",
-        "@effect/vitest": "^0.25.0",
+        "@effect/vitest": "^0.25.1",
         "@repo/config-typescript": "workspace:*",
         "@types/bun": "1.2.21",
         "vitest": "^3.2.4",
@@ -80,8 +80,8 @@
       "name": "@repo/domain",
       "version": "0.0.0",
       "dependencies": {
-        "@effect/platform": "^0.90.0",
-        "effect": "^3.17.1",
+        "@effect/platform": "latest",
+        "effect": "latest",
       },
       "devDependencies": {
         "@repo/config-typescript": "workspace:*",
@@ -773,7 +773,7 @@
 
     "typescript": ["typescript@5.9.2", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A=="],
 
-    "ultracite": ["ultracite@5.2.10", "", { "dependencies": { "@clack/prompts": "^0.11.0", "deepmerge": "^4.3.1", "jsonc-parser": "^3.3.1", "nypm": "^0.6.1", "trpc-cli": "^0.10.2", "vitest": "^3.2.4", "zod": "^4.1.5" }, "bin": { "ultracite": "dist/index.js" } }, "sha512-pwXm8qnrVBHiRgRC26jnpW0rv9wkfdzBZcNXZRvfVLiUx/B/rq8WCg3KvjWu8vQ1qps9WuhyvcMMqrgoV4vsTQ=="],
+    "ultracite": ["ultracite@5.2.14", "", { "dependencies": { "@clack/prompts": "^0.11.0", "deepmerge": "^4.3.1", "jsonc-parser": "^3.3.1", "nypm": "^0.6.1", "trpc-cli": "^0.10.2", "vitest": "^3.2.4", "zod": "^4.1.5" }, "bin": { "ultracite": "dist/index.js" } }, "sha512-gVisASeIzEU/7hGu28ClFKELw0CVSZhkO0WLL+B5gs7BVVDDQy3NMWcCcM4JifNa+4reWhO8OKUyScdaSCAIxQ=="],
 
     "undici-types": ["undici-types@7.10.0", "", {}, "sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag=="],
 

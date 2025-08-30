@@ -14,14 +14,14 @@
   },
   "dependencies": {
     "@effect/ai": "^0.26.0",
-    "@effect/platform": "^0.90.0",
+    "@effect/platform": "^0.90.6",
     "@effect/platform-bun": "^0.79.0",
     "@repo/domain": "workspace:*",
     "effect": "3.17.9"
   },
   "devDependencies": {
     "@effect/language-service": "^0.36.0",
-    "@effect/vitest": "^0.25.0",
+    "@effect/vitest": "^0.25.1",
     "@repo/config-typescript": "workspace:*",
     "@types/bun": "1.2.21",
     "vitest": "^3.2.4"

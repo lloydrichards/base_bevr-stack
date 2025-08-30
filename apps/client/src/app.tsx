@@ -1,4 +1,4 @@
-import { ApiResponse } from "@repo/domain";
+import { ApiResponse } from "@repo/domain/Api";
 import { Schema } from "effect";
 import { useState } from "react";
 import bun from "./assets/bun.svg";
@@ -25,13 +25,13 @@ function App() {
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-6">
       <div className="flex items-center gap-6">
-        <img alt="Bun logo" className="h-16 w-16" src={bun} />
-        <img alt="Effect logo" className="h-16 w-16" src={effect} />
-        <img alt="Vite logo" className="h-16 w-16" src={vite} />
-        <img alt="React logo" className="h-16 w-16" src={react} />
+        <img alt="Bun logo" height={64} src={bun} width={64} />
+        <img alt="Effect logo" height={64} src={effect} width={64} />
+        <img alt="Vite logo" height={64} src={vite} width={64} />
+        <img alt="React logo" height={64} src={react} width={64} />
       </div>
 
-      <h1 className="font-black text-5xl ">bEvr</h1>
+      <h1 className="font-black text-5xl">bEvr</h1>
       <h2 className="font-bold text-2xl">Bun + Effect + Vite + React</h2>
       <p>A typesafe fullstack monorepo</p>
       <div className="flex items-center gap-4">
