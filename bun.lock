@@ -54,6 +54,24 @@
         "vitest": "^3.2.4",
       },
     },
+    "apps/server-mcp": {
+      "name": "server-mcp",
+      "version": "0.0.1",
+      "dependencies": {
+        "@effect/ai": "^0.26.0",
+        "@effect/platform": "^0.90.0",
+        "@effect/platform-bun": "^0.79.0",
+        "@repo/domain": "workspace:*",
+        "effect": "3.17.9",
+      },
+      "devDependencies": {
+        "@effect/language-service": "^0.36.0",
+        "@effect/vitest": "^0.25.0",
+        "@repo/config-typescript": "workspace:*",
+        "@types/bun": "1.2.21",
+        "vitest": "^3.2.4",
+      },
+    },
     "packages/config-typescript": {
       "name": "@repo/config-typescript",
       "version": "0.0.0",
@@ -132,6 +150,8 @@
     "@clack/core": ["@clack/core@0.5.0", "", { "dependencies": { "picocolors": "^1.0.0", "sisteransi": "^1.0.5" } }, "sha512-p3y0FIOwaYRUPRcMO7+dlmLh8PSRcrjuTndsiA0WAFbWES0mLZlrjVoBRZ9DzkPFJZG6KGkJmoEAY0ZcVWTkow=="],
 
     "@clack/prompts": ["@clack/prompts@0.11.0", "", { "dependencies": { "@clack/core": "0.5.0", "picocolors": "^1.0.0", "sisteransi": "^1.0.5" } }, "sha512-pMN5FcrEw9hUkZA4f+zLlzivQSeQf5dRGJjSUbvVYDLvpKCdQx5OaknvKzgbtXOizhP+SJJJjqEbOe55uKKfAw=="],
+
+    "@effect/ai": ["@effect/ai@0.26.0", "", { "dependencies": { "find-my-way-ts": "^0.1.6" }, "peerDependencies": { "@effect/experimental": "^0.54.6", "@effect/platform": "^0.90.2", "@effect/rpc": "^0.69.0", "effect": "^3.17.7" } }, "sha512-zqnF0Ne+bctTVTysR7P1y7kM8M1h6PzdemDpcxe3lwDjl3HxsrijCr4YGvw9styiNscPTMYMZAKXti11mtnr5g=="],
 
     "@effect/cluster": ["@effect/cluster@0.46.4", "", { "peerDependencies": { "@effect/platform": "^0.90.0", "@effect/rpc": "^0.68.3", "@effect/sql": "^0.44.1", "@effect/workflow": "^0.8.3", "effect": "^3.17.6" } }, "sha512-81nWw5ABtRZZFmQTrWvfsUnqTg9LybIFYvmsiIL7xQ2t+g6746IZe9Tcv9bSmMdioJLgeuO4CiRg0FfDP2qCWA=="],
 
@@ -694,6 +714,8 @@
     "semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
     "server": ["server@workspace:apps/server"],
+
+    "server-mcp": ["server-mcp@workspace:apps/server-mcp"],
 
     "siginfo": ["siginfo@2.0.0", "", {}, "sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g=="],
 
