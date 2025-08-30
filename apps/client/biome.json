@@ -1,11 +1,9 @@
 {
+  "$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
   "root": false,
   "extends": "//",
   "linter": {
     "rules": {
-      "nursery": {
-        "noUnknownAtRule": "off"
-      },
       "performance": {
         "noImgElement": "off"
       }

@@ -1,6 +1,9 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
   "extends": ["ultracite"],
+  "files": {
+    "includes": ["!*.lock"]
+  },
   "formatter": {
     "enabled": true
   },
