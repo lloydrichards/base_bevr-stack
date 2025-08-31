@@ -42,6 +42,9 @@ bun format
 
 # Lint code
 bun lint
+
+# Type check
+bun type-check
 ```
 
 ## Project Structure
@@ -106,7 +109,18 @@ background:
 docker-compose up -d --build
 ```
 
-This will start the `client` and `server` applications.
+This will start all three services: `client`, `server`, and `server-mcp`.
+
+### Environment Variables
+
+You can configure the deployment using environment variables:
+
+```bash
+# Example .env file
+CLIENT_PORT=3000
+SERVER_PORT=8000
+MCP_PORT=9009
+```
 
 ## Type Safety
 

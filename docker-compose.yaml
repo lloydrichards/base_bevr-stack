@@ -11,6 +11,17 @@ services:
     networks:
       - app-network
 
+  server-mcp:
+    build:
+      context: .
+      dockerfile: ./apps/server-mcp/Dockerfile
+    environment:
+      MCP_PORT: ${MCP_PORT}
+    ports:
+      - "${MCP_PORT}:${MCP_PORT}"
+    networks:
+      - app-network
+
   client:
     build:
       context: .
@@ -23,6 +34,7 @@ services:
       - app-network
     depends_on:
       - server
+      - server-mcp
 
 networks:
   app-network:
