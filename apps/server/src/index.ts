@@ -1,7 +1,13 @@
-import { HttpApiBuilder, HttpServer } from "@effect/platform";
+import { HttpApiBuilder, HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
-import { Api, type ApiResponse } from "@repo/domain/Api";
-import { Config, Effect, Layer } from "effect";
+import { RpcSerialization, RpcServer } from "@effect/rpc";
+import {
+  Api,
+  type ApiResponse,
+  EventRpc,
+  type TickEvent,
+} from "@repo/domain/Api";
+import { Config, Effect, Layer, Mailbox } from "effect";
 
 // Define Live API Handlers
 const HealthGroupLive = HttpApiBuilder.group(Api, "health", (handlers) =>
@@ -17,19 +23,64 @@ const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
   })
 );
 
-// Define Live API
-const ApiLive = HttpApiBuilder.api(Api).pipe(
+export const EventRpcLive = EventRpc.toLayer(
+  Effect.gen(function* () {
+    yield* Effect.log("Starting Event RPC Live Implementation");
+    return EventRpc.of({
+      tick: Effect.fn(function* (payload) {
+        yield* Effect.log("Creating new tick stream");
+        const mailbox = yield* Mailbox.make<typeof TickEvent.Type>();
+        yield* Effect.forkScoped(
+          Effect.gen(function* () {
+            yield* mailbox.offer({ _tag: "starting" });
+            yield* Effect.sleep("3 seconds");
+            for (let i = 0; i < payload.ticks; i++) {
+              yield* Effect.sleep("1 second");
+              yield* mailbox.offer({ _tag: "tick" });
+            }
+            yield* mailbox.offer({ _tag: "end" });
+            yield* Effect.log("End event sent");
+          }).pipe(Effect.ensuring(mailbox.end))
+        );
+        return mailbox;
+      }),
+    });
+  })
+);
+
+// Define Api Router
+const ApiRouter = HttpLayerRouter.addHttpApi(Api).pipe(
   Layer.provide(Layer.merge(HealthGroupLive, HelloGroupLive))
 );
 
+// Define RPC Router
+const RpcRouter = RpcServer.layerHttpRouter({
+  group: EventRpc,
+  path: "/rpc",
+  protocol: "http",
+  spanPrefix: "rpc",
+}).pipe(
+  Layer.provide(EventRpcLive),
+  Layer.provide(RpcSerialization.layerNdjson)
+);
+
+const AllRouters = Layer.mergeAll(ApiRouter, RpcRouter).pipe(
+  Layer.provide(
+    HttpLayerRouter.cors({
+      allowedOrigins: ["*"],
+      allowedMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+      allowedHeaders: ["Content-Type", "Authorization", "B3", "traceparent"],
+      credentials: true,
+    })
+  )
+);
+
 const ServerConfig = Config.all({
-  port: Config.number("MCP_PORT").pipe(Config.withDefault(9000)),
+  port: Config.number("PORT").pipe(Config.withDefault(9000)),
 });
 
-const HttpLive = HttpApiBuilder.serve().pipe(
+const HttpLive = HttpLayerRouter.serve(AllRouters).pipe(
   HttpServer.withLogAddress,
-  Layer.provide(HttpApiBuilder.middlewareCors()),
-  Layer.provideMerge(ApiLive),
   Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig))
 );
 

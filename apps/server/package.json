@@ -14,6 +14,7 @@
   "dependencies": {
     "@effect/platform": "^0.90.6",
     "@effect/platform-bun": "^0.79.0",
+    "@effect/rpc": "^0.69.1",
     "@repo/domain": "workspace:*",
     "effect": "3.17.9"
   },

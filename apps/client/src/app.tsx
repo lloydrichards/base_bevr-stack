@@ -1,3 +1,4 @@
+import { Result, useAtom } from "@effect-atom/atom-react";
 import { ApiResponse } from "@repo/domain/Api";
 import { Schema } from "effect";
 import { useState } from "react";
@@ -6,11 +7,18 @@ import effect from "./assets/effect.svg";
 import react from "./assets/react.svg";
 import vite from "./assets/vite.svg";
 import { Button } from "./components/ui/button";
+import { tickAtom } from "./lib/atom";
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:9000";
 
 function App() {
   const [data, setData] = useState<typeof ApiResponse.Type | undefined>();
+  const [result, search] = useAtom(tickAtom);
+  const event = Result.getOrElse(result, () => null);
+
+  const handleSearch = () => {
+    search({ abort: false });
+  };
 
   async function sendRequest() {
     try {
@@ -42,6 +50,17 @@ function App() {
           <code>
             Message: {data.message} <br />
             Success: {data.success.toString()}
+          </code>
+        </pre>
+      )}
+      <div className="flex items-center gap-4">
+        <Button onClick={handleSearch}>Call RPC</Button>
+      </div>
+      {event && (
+        <pre className="rounded-md bg-gray-100 p-4">
+          <code>
+            Event: {event.event._tag} <br />
+            Message: {event.text}
           </code>
         </pre>
       )}

@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
+    ".": "./src/Api.ts",
     "./Api": "./src/Api.ts"
   },
   "scripts": {
@@ -12,6 +13,7 @@
   },
   "dependencies": {
     "@effect/platform": "^0.90.6",
+    "@effect/rpc": "^0.69.1",
     "effect": "^3.17.9"
   },
   "devDependencies": {

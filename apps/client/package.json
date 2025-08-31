@@ -12,6 +12,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@effect-atom/atom-react": "^0.1.15",
+    "@effect/platform": "^0.90.6",
+    "@effect/rpc": "^0.69.1",
     "@repo/domain": "workspace:*",
     "@tailwindcss/vite": "^4.1.12",
     "class-variance-authority": "^0.7.1",
@@ -22,8 +25,8 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwind-merge": "^3.3.1",
-    "tw-animate-css": "1.3.7",
-    "tailwindcss": "^4.1.12"
+    "tailwindcss": "^4.1.12",
+    "tw-animate-css": "1.3.7"
   },
   "devDependencies": {
     "@effect/language-service": "^0.36.0",
