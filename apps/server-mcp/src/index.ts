@@ -1,5 +1,5 @@
 import { AiTool, AiToolkit, McpServer } from "@effect/ai";
-import { HttpRouter, HttpServer } from "@effect/platform";
+import { HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { Config, Effect, Layer, Schema } from "effect";
 
@@ -68,17 +68,25 @@ const ServerConfig = Config.all({
   port: Config.number("MCP_PORT").pipe(Config.withDefault(9009)),
 });
 
-const HttpLive = HttpRouter.Default.serve().pipe(
-  HttpServer.withLogAddress,
-  Layer.provide(
-    McpServer.layerHttp({
-      name: "BEVR MCP Server",
-      version: "0.1.0",
-      path: "/mcp",
-    })
-  ),
+const McpRouter = McpServer.layerHttpRouter({
+  name: "BEVR MCP Server",
+  version: "0.1.0",
+  path: "/mcp",
+}).pipe(
   Layer.provideMerge(McpLive),
-  Layer.provide(BunHttpServer.layerConfig(ServerConfig))
+  Layer.provide(
+    HttpLayerRouter.cors({
+      allowedOrigins: ["*"],
+      allowedMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization", "mcp-protocol-version"],
+      credentials: false,
+    })
+  )
+);
+
+const HttpLive = HttpLayerRouter.serve(McpRouter).pipe(
+  HttpServer.withLogAddress,
+  Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig))
 );
 
 BunRuntime.runMain(Layer.launch(HttpLive));
