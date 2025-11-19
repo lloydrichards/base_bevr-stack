@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "dist",
     "noEmit": true,
-    "types": ["bun-types"],
+    "types": ["@types/bun"],
     "plugins": [
       {
         "name": "@effect/language-service"

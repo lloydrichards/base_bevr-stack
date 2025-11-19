@@ -1,35 +1,35 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.2/schema.json",
-  "extends": ["ultracite"],
-  "files": {
-    "includes": ["!*.lock"]
-  },
-  "formatter": {
-    "enabled": true
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle": "double"
-    }
-  },
-  "linter": {
-    "rules": {
-      "style": {
-        "noMagicNumbers": "off",
-        "useFilenamingConvention": {
-          "level": "warn",
-          "options": {
-            "filenameCases": ["kebab-case", "PascalCase"]
-          }
-        },
-        "noNonNullAssertion": "off"
-      },
-      "suspicious": {
-        "noConsole": {
-          "level": "warn",
-          "options": { "allow": ["error", "info"] }
-        }
-      }
-    }
-  }
+	"$schema": "https://biomejs.dev/schemas/2.3.6/schema.json",
+	"extends": ["ultracite/react"],
+	"files": {
+		"includes": ["!*.lock"]
+	},
+	"formatter": {
+		"enabled": true
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	},
+	"linter": {
+		"rules": {
+			"style": {
+				"noMagicNumbers": "off",
+				"useFilenamingConvention": {
+					"level": "warn",
+					"options": {
+						"filenameCases": ["kebab-case", "PascalCase"]
+					}
+				},
+				"noNonNullAssertion": "off"
+			},
+			"suspicious": {
+				"noConsole": {
+					"level": "warn",
+					"options": { "allow": ["error", "info"] }
+				}
+			}
+		}
+	}
 }
