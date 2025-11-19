@@ -12,10 +12,10 @@
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.2",
-    "turbo": "^2.5.6",
-    "typescript": "5.9.2",
-    "ultracite": "5.2.14"
+    "@biomejs/biome": "2.3.6",
+    "turbo": "^2.6.1",
+    "typescript": "5.9.3",
+    "ultracite": "6.3.4"
   },
   "engines": {
     "node": ">=18"

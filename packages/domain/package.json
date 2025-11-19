@@ -12,9 +12,9 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "dependencies": {
-    "@effect/platform": "^0.90.6",
-    "@effect/rpc": "^0.69.1",
-    "effect": "^3.17.9"
+    "@effect/platform": "^0.90.10",
+    "@effect/rpc": "^0.69.5",
+    "effect": "^3.19.4"
   },
   "devDependencies": {
     "@repo/config-typescript": "workspace:*"
