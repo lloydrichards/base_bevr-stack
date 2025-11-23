@@ -32,4 +32,6 @@ USER server-mcp
 COPY --from=builder /app/apps/server-mcp/dist/index.js ./server-mcp/index.js
 COPY --from=builder /app/apps/server-mcp/package.json ./server-mcp/package.json
 
+EXPOSE 8000
+
 CMD ["bun", "run", "./server-mcp/index.js"]

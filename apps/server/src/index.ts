@@ -48,6 +48,15 @@ export const EventRpcLive = EventRpc.toLayer(
   })
 );
 
+// Layer Definitions
+const ServerConfig = Config.all({
+  port: Config.number("PORT").pipe(Config.withDefault(9000)),
+  hostname: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
+  allowedOrigins: Config.string("ALLOWED_ORIGINS").pipe(
+    Config.withDefault("http://localhost:3000"),
+  ),
+});
+
 // Define Api Router
 const ApiRouter = HttpLayerRouter.addHttpApi(Api).pipe(
   Layer.provide(Layer.merge(HealthGroupLive, HelloGroupLive))
@@ -64,24 +73,28 @@ const RpcRouter = RpcServer.layerHttpRouter({
   Layer.provide(RpcSerialization.layerNdjson)
 );
 
-const AllRouters = Layer.mergeAll(ApiRouter, RpcRouter).pipe(
-  Layer.provide(
-    HttpLayerRouter.cors({
-      allowedOrigins: ["*"],
-      allowedMethods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-      allowedHeaders: ["Content-Type", "Authorization", "B3", "traceparent"],
-      credentials: true,
-    })
-  )
-);
+const HttpLive = Effect.gen(function* () {
+  // Parse allowed origins from config
+  const config = yield* ServerConfig;
+  const allowedOrigins = config.allowedOrigins.split(",").map((o) => o.trim());
 
-const ServerConfig = Config.all({
-  port: Config.number("PORT").pipe(Config.withDefault(9000)),
-});
+  yield* Effect.log(`CORS allowed origins: ${allowedOrigins.join(", ")}`);
 
-const HttpLive = HttpLayerRouter.serve(AllRouters).pipe(
-  HttpServer.withLogAddress,
-  Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig))
-);
+  const AllRouters = Layer.mergeAll(ApiRouter, RpcRouter).pipe(
+    Layer.provide(
+      HttpLayerRouter.cors({
+        allowedOrigins,
+        allowedMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "B3", "traceparent"],
+        credentials: true,
+      }),
+    ),
+  );
 
-BunRuntime.runMain(Layer.launch(HttpLive));
+  return HttpLayerRouter.serve(AllRouters).pipe(
+    HttpServer.withLogAddress,
+    Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig)),
+  );
+}).pipe(Layer.unwrapEffect, Layer.launch);
+
+BunRuntime.runMain(HttpLive);
