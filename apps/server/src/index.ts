@@ -11,7 +11,7 @@ import { Config, Effect, Layer, Mailbox } from "effect";
 
 // Define Live API Handlers
 const HealthGroupLive = HttpApiBuilder.group(Api, "health", (handlers) =>
-  handlers.handle("get", () => Effect.succeed("Hello Effect!"))
+  handlers.handle("get", () => Effect.succeed("Hello Effect!")),
 );
 const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
   handlers.handle("get", () => {
@@ -20,7 +20,7 @@ const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
       success: true,
     };
     return Effect.succeed(data);
-  })
+  }),
 );
 
 export const EventRpcLive = EventRpc.toLayer(
@@ -40,12 +40,12 @@ export const EventRpcLive = EventRpc.toLayer(
             }
             yield* mailbox.offer({ _tag: "end" });
             yield* Effect.log("End event sent");
-          }).pipe(Effect.ensuring(mailbox.end))
+          }).pipe(Effect.ensuring(mailbox.end)),
         );
         return mailbox;
       }),
     });
-  })
+  }),
 );
 
 // Layer Definitions
@@ -59,7 +59,7 @@ const ServerConfig = Config.all({
 
 // Define Api Router
 const ApiRouter = HttpLayerRouter.addHttpApi(Api).pipe(
-  Layer.provide(Layer.merge(HealthGroupLive, HelloGroupLive))
+  Layer.provide(Layer.merge(HealthGroupLive, HelloGroupLive)),
 );
 
 // Define RPC Router
@@ -70,7 +70,7 @@ const RpcRouter = RpcServer.layerHttpRouter({
   spanPrefix: "rpc",
 }).pipe(
   Layer.provide(EventRpcLive),
-  Layer.provide(RpcSerialization.layerNdjson)
+  Layer.provide(RpcSerialization.layerNdjson),
 );
 
 const HttpLive = Effect.gen(function* () {

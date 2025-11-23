@@ -9,7 +9,7 @@ const ProtocolLive = EffectRpcClient.layerProtocolHttp({
   url: `${SERVER_URL}/rpc`,
 }).pipe(
   Layer.provide(FetchHttpClient.layer),
-  Layer.provide(RpcSerialization.layerNdjson)
+  Layer.provide(RpcSerialization.layerNdjson),
 );
 
 export class RpcClient extends Effect.Service<RpcClient>()("RpcClient", {

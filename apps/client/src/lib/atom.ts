@@ -14,7 +14,7 @@ export const helloAtom = runtime.fn(() =>
       baseUrl: SERVER_URL,
     });
     return yield* client.hello.get();
-  }).pipe(Effect.provide(FetchHttpClient.layer))
+  }).pipe(Effect.provide(FetchHttpClient.layer)),
 );
 export const tickAtom = runtime.fn(
   ({ abort = false }: { readonly abort?: boolean }) =>
@@ -23,7 +23,7 @@ export const tickAtom = runtime.fn(
         yield* Effect.log("Starting Tick Atom Stream");
         const rpc = yield* RpcClient;
         return rpc.client.tick({ ticks: 10 });
-      }).pipe((self) => (abort ? Effect.interrupt : self))
+      }).pipe((self) => (abort ? Effect.interrupt : self)),
     ).pipe(
       Stream.catchTags({
         RpcClientError: Effect.die,
@@ -32,7 +32,7 @@ export const tickAtom = runtime.fn(
         { acc: "" },
         (
           state,
-          event
+          event,
         ): readonly [
           { acc: string },
           { text: string; event: typeof TickEvent.Type },
@@ -53,7 +53,7 @@ export const tickAtom = runtime.fn(
             default:
               return [state, { text: state.acc, event }] as const;
           }
-        }
-      )
-    )
+        },
+      ),
+    ),
 );

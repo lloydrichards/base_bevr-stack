@@ -22,7 +22,7 @@ export const Api = HttpApi.make("Api").add(HealthGroup).add(HelloGroup);
 export const TickEvent = Schema.Union(
   Schema.TaggedStruct("starting", {}),
   Schema.TaggedStruct("tick", {}),
-  Schema.TaggedStruct("end", {})
+  Schema.TaggedStruct("end", {}),
 );
 
 export class EventRpc extends RpcGroup.make(
@@ -32,5 +32,5 @@ export class EventRpc extends RpcGroup.make(
     }),
     success: TickEvent,
     stream: true,
-  })
+  }),
 ) {}

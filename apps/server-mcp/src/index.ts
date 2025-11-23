@@ -10,9 +10,9 @@ const ResourceLayer = Layer.mergeAll(
     name: "Primer Document",
     description: "Documentation for the application",
     content: Effect.succeed(
-      "This is a sample primer document to demonstrate MCP server capabilities."
+      "This is a sample primer document to demonstrate MCP server capabilities.",
     ),
-  })
+  }),
   // You can add more resources here
 );
 
@@ -26,9 +26,9 @@ const PromptLayer = Layer.mergeAll(
     }),
     content: ({ name }) =>
       Effect.succeed(
-        `Hello, ${name}! Welcome to the MCP server demonstration.`
+        `Hello, ${name}! Welcome to the MCP server demonstration.`,
       ),
-  })
+  }),
   // You can add more prompts here
 );
 
@@ -43,7 +43,7 @@ class AiTools extends AiToolkit.make(
         description: "The search term to use to find dad jokes",
       }),
     },
-  })
+  }),
   // You can add more tools here
 ) {}
 
@@ -53,12 +53,12 @@ const ToolLayer = McpServer.toolkit(AiTools).pipe(
       Effect.succeed({
         GetDadJoke: ({ searchTerm }) =>
           Effect.succeed(
-            `Here's a dad joke about ${searchTerm}: Why don't ${searchTerm}s ever get lost? Because they always follow the map!`
+            `Here's a dad joke about ${searchTerm}: Why don't ${searchTerm}s ever get lost? Because they always follow the map!`,
           ),
         // add implementation for more tools here
-      })
-    )
-  )
+      }),
+    ),
+  ),
 );
 
 // Define Live API
@@ -80,13 +80,13 @@ const McpRouter = McpServer.layerHttpRouter({
       allowedMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "mcp-protocol-version"],
       credentials: false,
-    })
-  )
+    }),
+  ),
 );
 
 const HttpLive = HttpLayerRouter.serve(McpRouter).pipe(
   HttpServer.withLogAddress,
-  Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig))
+  Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig)),
 );
 
 BunRuntime.runMain(Layer.launch(HttpLive));
