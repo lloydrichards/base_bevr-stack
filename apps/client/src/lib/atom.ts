@@ -1,12 +1,15 @@
+import { DevTools } from "@effect/experimental";
 import { FetchHttpClient, HttpApiClient } from "@effect/platform";
 import { Atom } from "@effect-atom/atom-react";
 import { Api, type TickEvent } from "@repo/domain";
-import { Effect, Stream } from "effect";
+import { Effect, Layer, Stream } from "effect";
 import { RpcClient } from "./rpc-client";
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:9000";
 
-const runtime = Atom.runtime(RpcClient.Default);
+const runtime = Atom.runtime(
+  RpcClient.Default.pipe(Layer.provideMerge(DevTools.layer())),
+);
 
 export const helloAtom = runtime.fn(() =>
   Effect.gen(function* () {

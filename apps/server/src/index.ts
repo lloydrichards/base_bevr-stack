@@ -1,3 +1,4 @@
+import { DevTools } from "@effect/experimental";
 import { HttpApiBuilder, HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { RpcSerialization, RpcServer } from "@effect/rpc";
@@ -93,6 +94,7 @@ const HttpLive = Effect.gen(function* () {
 
   return HttpLayerRouter.serve(AllRouters).pipe(
     HttpServer.withLogAddress,
+    Layer.provide(DevTools.layer()),
     Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig)),
   );
 }).pipe(Layer.unwrapEffect, Layer.launch);
