@@ -1,4 +1,4 @@
-import { AiTool, AiToolkit, McpServer } from "@effect/ai";
+import { McpServer, Tool, Toolkit } from "@effect/ai";
 import { HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { Config, Effect, Layer, Schema } from "effect";
@@ -33,8 +33,8 @@ const PromptLayer = Layer.mergeAll(
 );
 
 // Define Toolkit
-class AiTools extends AiToolkit.make(
-  AiTool.make("GetDadJoke", {
+class AiTools extends Toolkit.make(
+  Tool.make("GetDadJoke", {
     description: "Get a hilarious dad joke from the ICanHazDadJoke API",
     success: Schema.String,
     failure: Schema.Never,
