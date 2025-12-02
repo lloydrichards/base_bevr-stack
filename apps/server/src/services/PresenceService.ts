@@ -14,13 +14,14 @@ export class PresenceService extends Effect.Service<PresenceService>()(
     effect: Effect.gen(function* () {
       yield* Effect.log("Initializing PresenceService");
 
-      const clientsRef = yield* Ref.make(new Map<ClientId, ClientInfo>());
+      const clientsRef = yield* Ref.make(
+        new Map<typeof ClientId.Type, ClientInfo>(),
+      );
       const pubsub = yield* PubSub.unbounded<PresenceEventType>();
 
-      const generateClientId = () =>
-        Schema.decodeUnknownSync(ClientId)(crypto.randomUUID());
+      const generateClientId = () => ClientId.make(crypto.randomUUID());
 
-      const addClient = (clientId: ClientId, info: ClientInfo) =>
+      const addClient = (clientId: typeof ClientId.Type, info: ClientInfo) =>
         Effect.gen(function* () {
           yield* Ref.update(clientsRef, (clients) => {
             const newClients = new Map(clients);
@@ -36,7 +37,7 @@ export class PresenceService extends Effect.Service<PresenceService>()(
           yield* Effect.log(`Client added: ${clientId}`);
         });
 
-      const removeClient = (clientId: ClientId) =>
+      const removeClient = (clientId: typeof ClientId.Type) =>
         Effect.gen(function* () {
           const clients = yield* Ref.get(clientsRef);
           const client = clients.get(clientId);
@@ -58,7 +59,10 @@ export class PresenceService extends Effect.Service<PresenceService>()(
           }
         });
 
-      const setStatus = (clientId: ClientId, status: ClientStatus) =>
+      const setStatus = (
+        clientId: typeof ClientId.Type,
+        status: ClientStatus,
+      ) =>
         Effect.gen(function* () {
           const clients = yield* Ref.get(clientsRef);
           const client = clients.get(clientId);

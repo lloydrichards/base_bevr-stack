@@ -14,10 +14,7 @@
       }
     ]
   },
-  "references": [
-    { "path": "./tsconfig.node.json" },
-    { "path": "../../packages/domain" }
-  ],
+  "references": [{ "path": "./tsconfig.node.json" }],
   "include": ["src", "test"],
   "exclude": ["node_modules", "dist", "dist-node"]
 }

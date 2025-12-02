@@ -15,11 +15,11 @@ import { WebSocketClient } from "../../lib/web-socket-client";
 const buildClientListFromEvents = (
   events: readonly WebSocketEvent[],
 ): {
-  clients: Map<ClientId, ClientInfo>;
-  myClientId: ClientId | null;
+  clients: Map<typeof ClientId.Type, ClientInfo>;
+  myClientId: typeof ClientId.Type | null;
 } => {
-  const clients = new Map<ClientId, ClientInfo>();
-  let myClientId: ClientId | null = null;
+  const clients = new Map<typeof ClientId.Type, ClientInfo>();
+  let myClientId: typeof ClientId.Type | null = null;
 
   for (const event of events) {
     switch (event._tag) {

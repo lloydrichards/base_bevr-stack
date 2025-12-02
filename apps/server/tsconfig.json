@@ -10,7 +10,6 @@
       }
     ]
   },
-  "references": [{ "path": "../../packages/domain" }],
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

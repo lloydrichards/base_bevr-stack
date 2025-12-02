@@ -18,7 +18,7 @@
   "dependencies": {
     "@effect/platform": "^0.93.4",
     "@effect/rpc": "^0.72.2",
-    "effect": "^3.19.7"
+    "effect": "^3.19.8"
   },
   "devDependencies": {
     "@repo/config-typescript": "workspace:*"

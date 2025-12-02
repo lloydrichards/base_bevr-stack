@@ -1,15 +1,11 @@
 import { Rpc, RpcGroup } from "@effect/rpc";
 import { Schema } from "effect";
 
-// Branded ClientId type for compile-time safety
 export const ClientId = Schema.String.pipe(Schema.brand("ClientId"));
-export type ClientId = Schema.Schema.Type<typeof ClientId>;
 
-// Presence status enumeration
 export const ClientStatus = Schema.Literal("online", "away", "busy");
 export type ClientStatus = Schema.Schema.Type<typeof ClientStatus>;
 
-// Client information with presence status
 export const ClientInfo = Schema.Struct({
   clientId: ClientId,
   status: ClientStatus,
