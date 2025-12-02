@@ -2,13 +2,9 @@ import { DevTools } from "@effect/experimental";
 import { HttpApiBuilder, HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { RpcSerialization, RpcServer } from "@effect/rpc";
+import { Api, type ApiResponse } from "@repo/domain/Api";
+import { EventRpc, type TickEvent } from "@repo/domain/Rpc";
 import {
-  Api,
-  type ApiResponse,
-  EventRpc,
-  type TickEvent,
-} from "@repo/domain/Api";
-import { Config, Effect, Layer, Mailbox } from "effect";
 
 // Define Live API Handlers
 const HealthGroupLive = HttpApiBuilder.group(Api, "health", (handlers) =>

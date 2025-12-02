@@ -1,7 +1,8 @@
 import { DevTools } from "@effect/experimental";
 import { FetchHttpClient, HttpApiClient } from "@effect/platform";
 import { Atom } from "@effect-atom/atom-react";
-import { Api, type TickEvent } from "@repo/domain";
+import { Api } from "@repo/domain/Api";
+import type { TickEvent } from "@repo/domain/Rpc";
 import { Effect, Layer, Stream } from "effect";
 import { RpcClient } from "./rpc-client";
 

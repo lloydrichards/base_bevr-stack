@@ -12,7 +12,7 @@
       "cache": false
     },
     "type-check": {
-      "dependsOn": ["@repo/domain#build", "^type-check"]
+      "dependsOn": ["^type-check"]
     },
     "test": {
       "dependsOn": ["^test"]
