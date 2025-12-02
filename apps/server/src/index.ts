@@ -5,11 +5,17 @@ import { RpcSerialization, RpcServer } from "@effect/rpc";
 import { Api, type ApiResponse } from "@repo/domain/Api";
 import { EventRpc, type TickEvent } from "@repo/domain/Rpc";
 import {
+  type ClientInfo,
+  type WebSocketEvent,
+  WebSocketRpc,
+} from "@repo/domain/WebSocket";
+import { Config, Effect, Layer, Mailbox, Stream } from "effect";
+import { PresenceService } from "./services/PresenceService";
 
-// Define Live API Handlers
 const HealthGroupLive = HttpApiBuilder.group(Api, "health", (handlers) =>
   handlers.handle("get", () => Effect.succeed("Hello Effect!")),
 );
+
 const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
   handlers.handle("get", () => {
     const data: typeof ApiResponse.Type = {
@@ -20,10 +26,10 @@ const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
   }),
 );
 
-export const EventRpcLive = EventRpc.toLayer(
+const EventRpcLive = EventRpc.toLayer(
   Effect.gen(function* () {
     yield* Effect.log("Starting Event RPC Live Implementation");
-    return EventRpc.of({
+    return {
       tick: Effect.fn(function* (payload) {
         yield* Effect.log("Creating new tick stream");
         const mailbox = yield* Mailbox.make<typeof TickEvent.Type>();
@@ -41,11 +47,86 @@ export const EventRpcLive = EventRpc.toLayer(
         );
         return mailbox;
       }),
-    });
+    };
   }),
 );
 
-// Layer Definitions
+const PresenceRpcLive = WebSocketRpc.toLayer(
+  Effect.gen(function* () {
+    const presence = yield* PresenceService;
+    yield* Effect.log("Starting Presence RPC Live Implementation");
+
+    return {
+      subscribe: Effect.fn(function* () {
+        yield* Effect.log("New presence subscription");
+
+        const clientId = presence.generateClientId();
+        const connectedAt = Date.now();
+        const clientInfo: ClientInfo = {
+          clientId,
+          status: "online",
+          connectedAt,
+        };
+
+        const mailbox = yield* Mailbox.make<WebSocketEvent>();
+        const existingClients = yield* presence.getClients();
+        const subscription = yield* presence.subscribe();
+
+        yield* Effect.forkScoped(
+          Stream.fromQueue(subscription).pipe(
+            Stream.tap(mailbox.offer),
+            Stream.runDrain,
+            Effect.ensuring(
+              Effect.gen(function* () {
+                yield* presence.removeClient(clientId);
+                yield* mailbox.end;
+                yield* Effect.log(
+                  `Presence subscription ended for ${clientId}`,
+                );
+              }),
+            ),
+          ),
+        );
+
+        yield* presence.addClient(clientId, clientInfo);
+
+        yield* mailbox.offer({
+          _tag: "connected",
+          clientId,
+          connectedAt,
+        });
+
+        for (const client of existingClients) {
+          yield* mailbox.offer({
+            _tag: "user_joined",
+            client,
+          });
+        }
+
+        return mailbox;
+      }),
+
+      setStatus: Effect.fn(function* (payload) {
+        yield* Effect.log(
+          `Setting status for ${payload.clientId} to ${payload.status}`,
+        );
+        yield* presence.setStatus(payload.clientId, payload.status);
+        return { success: true };
+      }),
+
+      getPresence: Effect.fn(function* () {
+        const clients = yield* presence.getClients();
+        yield* Effect.log(`Returning ${clients.length} clients`);
+        return { clients: [...clients] };
+      }),
+    };
+  }),
+);
+
+// ============================================================================
+// Server Configuration
+// ============================================================================
+
 const ServerConfig = Config.all({
   port: Config.number("PORT").pipe(Config.withDefault(9000)),
   hostname: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
@@ -54,30 +135,57 @@ const ServerConfig = Config.all({
   ),
 });
 
-// Define Api Router
+// ============================================================================
+// Router Composition
+// ============================================================================
+
+// HTTP API Router
 const ApiRouter = HttpLayerRouter.addHttpApi(Api).pipe(
   Layer.provide(Layer.merge(HealthGroupLive, HelloGroupLive)),
 );
 
-// Define RPC Router
-const RpcRouter = RpcServer.layerHttpRouter({
+// HTTP RPC Router (for EventRpc - streaming over HTTP)
+const HttpRpcRouter = RpcServer.layerHttpRouter({
   group: EventRpc,
   path: "/rpc",
-  protocol: "http",
+  protocol: "http", // Use HTTP for EventRpc
   spanPrefix: "rpc",
 }).pipe(
   Layer.provide(EventRpcLive),
   Layer.provide(RpcSerialization.layerNdjson),
 );
 
+// WebSocket RPC Router (for PresenceRpc - real-time presence)
+const WebSocketRpcRouter = RpcServer.layerHttpRouter({
+  group: WebSocketRpc,
+  path: "/ws",
+  protocol: "websocket", // Use WebSocket for PresenceRpc!
+  spanPrefix: "ws",
+}).pipe(
+  Layer.provide(PresenceRpcLive),
+  Layer.provide(PresenceService.Default),
+  Layer.provide(RpcSerialization.layerNdjson),
+);
+
+// ============================================================================
+// Server Launch
+// ============================================================================
+
 const HttpLive = Effect.gen(function* () {
-  // Parse allowed origins from config
   const config = yield* ServerConfig;
   const allowedOrigins = config.allowedOrigins.split(",").map((o) => o.trim());
 
   yield* Effect.log(`CORS allowed origins: ${allowedOrigins.join(", ")}`);
+  yield* Effect.log("Starting server with:");
+  yield* Effect.log("  - HTTP API at /");
+  yield* Effect.log("  - HTTP RPC at /rpc (EventRpc)");
+  yield* Effect.log("  - WebSocket RPC at /ws (PresenceRpc)");
 
-  const AllRouters = Layer.mergeAll(ApiRouter, RpcRouter).pipe(
+  const AllRouters = Layer.mergeAll(
+    ApiRouter,
+    HttpRpcRouter,
+    WebSocketRpcRouter,
+  ).pipe(
     Layer.provide(
       HttpLayerRouter.cors({
         allowedOrigins,

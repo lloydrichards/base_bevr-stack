@@ -4,6 +4,7 @@ import effect from "./assets/effect.svg";
 import react from "./assets/react.svg";
 import vite from "./assets/vite.svg";
 import { Button } from "./components/ui/button";
+import { PresencePanel } from "./components/ui/presence-panel";
 import { ResponseCard } from "./components/ui/response-card";
 import { helloAtom, tickAtom } from "./lib/atom";
 
@@ -33,6 +34,11 @@ function App() {
         <h1 className="font-black text-5xl">bEvr</h1>
         <h2 className="font-bold text-2xl">Bun + Effect + Vite + React</h2>
         <p className="text-gray-600">A typesafe fullstack monorepo</p>
+      </div>
+
+      {/* WebSocket Presence Panel */}
+      <div className="w-full max-w-md">
+        <PresencePanel />
       </div>
 
       <div className="grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">

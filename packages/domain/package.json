@@ -7,6 +7,7 @@
     ".": "./src/Api.ts",
     "./Api": "./src/Api.ts",
     "./Rpc": "./src/Rpc.ts",
+    "./WebSocket": "./src/WebSocket.ts"
   },
   "main": "./src/Api.ts",
   "types": "./src/Api.ts",
