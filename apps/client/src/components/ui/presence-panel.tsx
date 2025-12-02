@@ -6,7 +6,10 @@ import type {
   WebSocketEvent,
 } from "@repo/domain/WebSocket";
 import { useEffect, useMemo } from "react";
-import { WebSocketClient } from "../../lib/web-socket-client";
+import {
+  presenceSubscriptionAtom,
+  WebSocketClient,
+} from "../../lib/web-socket-client";
 
 /**
  * Build the current client list by replaying all events from the stream.
@@ -57,30 +60,22 @@ const buildClientListFromEvents = (
 };
 
 export function PresencePanel() {
-  const [eventsResult, pullNext] = useAtom(
-    WebSocketClient.query("subscribe", {}),
-  );
+  const [eventsResult, startSubscription] = useAtom(presenceSubscriptionAtom);
 
   const setStatus = useAtomSet(WebSocketClient.mutation("setStatus"));
 
-  const streamData = Result.getOrElse(eventsResult, () => ({
-    done: false,
-    items: [],
-  }));
-
   useEffect(() => {
-    if (Result.isSuccess(eventsResult) && !streamData.done) {
-      const timeoutId = setTimeout(() => {
-        pullNext();
-      }, 100);
-      return () => clearTimeout(timeoutId);
-    }
-    return;
-  }, [eventsResult, streamData.done, pullNext]);
+    startSubscription();
+  }, [startSubscription]);
+
+  const events = Result.getOrElse(
+    eventsResult,
+    () => [] as readonly WebSocketEvent[],
+  );
 
   const { clients: clientMap, myClientId } = useMemo(
-    () => buildClientListFromEvents(streamData.items),
-    [streamData.items],
+    () => buildClientListFromEvents(events),
+    [events],
   );
 
   const clients = useMemo(() => Array.from(clientMap.values()), [clientMap]);

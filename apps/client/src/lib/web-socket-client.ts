@@ -1,8 +1,10 @@
 import { BrowserSocket } from "@effect/platform-browser";
 import { RpcClient, RpcSerialization } from "@effect/rpc";
-import { AtomRpc } from "@effect-atom/atom-react";
+import type { RpcClientError } from "@effect/rpc/RpcClientError";
+import { type Atom, AtomRpc } from "@effect-atom/atom-react";
+import type { WebSocketEvent } from "@repo/domain/WebSocket";
 import { WebSocketRpc } from "@repo/domain/WebSocket";
-import { Layer } from "effect";
+import { type Cause, Effect, Layer, Stream } from "effect";
 
 const WS_URL = import.meta.env["VITE_WS_URL"] || "ws://localhost:9000/ws";
 
@@ -18,3 +20,25 @@ export class WebSocketClient extends AtomRpc.Tag<WebSocketClient>()(
     ),
   },
 ) {}
+
+export const presenceSubscriptionAtom: Atom.AtomResultFn<
+  void,
+  readonly WebSocketEvent[],
+  RpcClientError | Cause.NoSuchElementException
+> = WebSocketClient.runtime.fn(() =>
+  Effect.gen(function* () {
+    yield* Effect.log("Starting presence subscription stream");
+    const client = yield* WebSocketClient;
+    return client("subscribe", {});
+  }).pipe(
+    Effect.map((stream) =>
+      stream.pipe(
+        Stream.scan<WebSocketEvent[], WebSocketEvent>([], (acc, event) => [
+          ...acc,
+          event,
+        ]),
+      ),
+    ),
+    Stream.unwrap,
+  ),
+);
