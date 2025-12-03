@@ -4,7 +4,7 @@ import {
   type ClientStatus,
   type WebSocketEvent,
 } from "@repo/domain/WebSocket";
-import { Effect, PubSub, Ref, Schema } from "effect";
+import { Effect, PubSub, Ref } from "effect";
 
 export type PresenceEventType = typeof WebSocketEvent.Type;
 
