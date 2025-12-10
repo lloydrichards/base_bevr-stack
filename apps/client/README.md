@@ -23,7 +23,7 @@ bun dev --filter=client
 bun build --filter=client
 ```
 
-The app runs on `http://localhost:3001` in development.
+The app runs on `http://localhost:3000` in development.
 
 ## Architecture
 
@@ -43,6 +43,37 @@ const response = await fetch("/api/hello");
 // Decode the response using Effect Schema
 const res = Schema.decodeUnknownSync(ApiResponse)(await req.json());
 ```
+
+## Testing
+
+The client uses **Vitest 4.x with Browser Mode** (Playwright) for testing React
+components in a real browser environment.
+
+```bash
+# Run client tests
+bun run test --filter=client
+```
+
+**Test Setup:**
+
+- **Browser Mode**: Tests run in Playwright-controlled browser
+- **vitest-browser-react**: React testing utilities for Browser Mode
+- **CSS Support**: Tailwind CSS is processed during tests
+
+**Test File Structure:**
+
+```typescript
+import { render } from "vitest-browser-react";
+import { expect, test } from "vitest";
+import { App } from "./app";
+
+test("renders app", async () => {
+  const screen = render(<App />);
+  await expect.element(screen.getByText("Hello")).toBeInTheDocument();
+});
+```
+
+Tests are colocated with source files using the `*.test.tsx` pattern.
 
 ## Learn More
 
