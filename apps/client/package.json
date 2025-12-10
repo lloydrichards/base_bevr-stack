@@ -12,8 +12,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@effect-atom/atom-react": "^0.4.0",
-    "@effect/experimental": "^0.57.6",
+    "@effect-atom/atom-react": "^0.4.3",
+    "@effect/experimental": "^0.57.11",
     "@effect/platform": "^0.93.4",
     "@effect/platform-browser": "^0.73.0",
     "@effect/rpc": "^0.72.2",
@@ -21,22 +21,22 @@
     "@tailwindcss/vite": "^4.1.17",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "effect": "3.19.8",
-    "lucide-react": "^0.555.0",
+    "effect": "3.19.10",
+    "lucide-react": "^0.556.0",
     "radix-ui": "^1.4.3",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.17",
     "tw-animate-css": "1.4.0"
   },
   "devDependencies": {
-    "@effect/language-service": "^0.58.4",
+    "@effect/language-service": "^0.62.0",
     "@repo/config-typescript": "workspace:*",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.1",
+    "@vitejs/plugin-react": "^5.1.2",
     "typescript": "~5.9.3",
-    "vite": "^7.2.4"
+    "vite": "^7.2.7"
   }
 }
