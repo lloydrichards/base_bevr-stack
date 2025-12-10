@@ -1,5 +1,5 @@
-import { render } from "vitest-browser-react";
 import { describe, expect, test, vi } from "vitest";
+import { render } from "vitest-browser-react";
 import App from "./app";
 
 // Mock the atom hooks to avoid real API calls

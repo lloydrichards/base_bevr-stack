@@ -5,9 +5,9 @@
     "build": "turbo run build",
     "clean": "turbo run clean && git clean -xdf node_modules",
     "dev": "turbo run dev",
-    "lint": "biome lint",
-    "format": "biome check --write",
-    "format:check": "biome check",
+    "lint": "biome lint .",
+    "format": "biome check --write .",
+    "format:check": "biome check .",
     "test": "turbo run test",
     "test:e2e": "playwright test",
     "type-check": "turbo run type-check"

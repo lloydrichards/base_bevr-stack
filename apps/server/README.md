@@ -75,10 +75,10 @@ bun run test --filter=server -- src/index.test.ts
 
 ```typescript
 import { Effect } from "effect";
-import { describe, effect, expect, it } from "@effect/vitest";
+import { describe, expect, it } from "@effect/vitest";
 
 describe("MyService", () => {
-  effect.it("should return data", () =>
+  it.effect("should return data", () =>
     Effect.gen(function* () {
       const service = yield* MyService;
       const result = yield* service.getData();

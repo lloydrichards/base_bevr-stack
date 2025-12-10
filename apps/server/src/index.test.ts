@@ -1,5 +1,4 @@
 import { describe, expect, it } from "@effect/vitest";
-import type { ApiResponse } from "@repo/domain/Api";
 import { Effect, Exit } from "effect";
 
 describe("Server", () => {
