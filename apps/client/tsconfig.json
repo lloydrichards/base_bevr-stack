@@ -14,7 +14,7 @@
       }
     ]
   },
-  "references": [{ "path": "./tsconfig.node.json" }],
+  "references": [{ "path": "./tsconfig.config.json" }],
   "include": ["src", "test"],
   "exclude": ["node_modules", "dist", "dist-node"]
 }

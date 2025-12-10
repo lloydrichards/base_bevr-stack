@@ -47,6 +47,42 @@ bun lint
 bun type-check
 ```
 
+### Testing
+
+Run tests across the monorepo:
+
+```bash
+# Run all unit tests
+bun run test
+
+# Run tests for specific apps
+bun run test --filter=client
+bun run test --filter=server
+
+# Run E2E and visual regression tests
+bun run test:e2e
+
+# Update visual regression baselines
+bun run test:e2e -- --update-snapshots
+```
+
+### Test Stack
+
+- **Client**: Vitest 4.x with Browser Mode (Playwright), vitest-browser-react
+- **Server**: Vitest 4.x with Node environment, @effect/vitest
+- **E2E**: Playwright with visual regression testing
+
+### CI/CD Workflows
+
+| Workflow       | Trigger   | Purpose                       |
+| -------------- | --------- | ----------------------------- |
+| `check-client` | PR + main | Fast: lint, types, unit tests |
+| `check-server` | PR + main | Fast: lint, types, unit tests |
+| `post-merge`   | main only | Slow: E2E, visual regression  |
+
+Visual regression baselines are stored in `e2e/smoke.spec.ts-snapshots/` and
+should be committed to git. Update them when UI changes are intentional.
+
 ## Project Structure
 
 ```txt

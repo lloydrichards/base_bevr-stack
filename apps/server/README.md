@@ -22,7 +22,7 @@ bun dev --filter=server
 bun build --filter=server
 ```
 
-The API runs on `http://localhost:3000` in development.
+The API runs on `http://localhost:9000` in development.
 
 ## Architecture
 
@@ -57,6 +57,39 @@ const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
   })
 );
 ```
+
+## Testing
+
+The server uses **Vitest 4.x** with **@effect/vitest** for testing Effect-based
+code.
+
+```bash
+# Run server tests
+bun run test --filter=server
+
+# Run specific test file
+bun run test --filter=server -- src/index.test.ts
+```
+
+**Effect Testing Patterns:**
+
+```typescript
+import { Effect } from "effect";
+import { describe, expect, it } from "@effect/vitest";
+
+describe("MyService", () => {
+  it.effect("should return data", () =>
+    Effect.gen(function* () {
+      const service = yield* MyService;
+      const result = yield* service.getData();
+      expect(result).toEqual(expectedData);
+    })
+  );
+});
+```
+
+Use `effect.it()` for tests that return Effect values. The test runner
+automatically handles Effect execution and error propagation.
 
 ## Learn More
 

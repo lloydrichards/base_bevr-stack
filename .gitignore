@@ -14,6 +14,13 @@ node_modules
 
 # Testing
 coverage
+.vitest-attachments/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 
 # Turbo
 .turbo
