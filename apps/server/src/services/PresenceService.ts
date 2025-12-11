@@ -17,7 +17,7 @@ export class PresenceService extends Effect.Service<PresenceService>()(
       const clientsRef = yield* Ref.make(
         new Map<typeof ClientId.Type, ClientInfo>(),
       );
-      const pubsub = yield* PubSub.unbounded<PresenceEventType>();
+      const pubsub = yield* PubSub.sliding<PresenceEventType>(1000);
 
       const generateClientId = () => ClientId.make(crypto.randomUUID());
 

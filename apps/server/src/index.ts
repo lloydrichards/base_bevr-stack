@@ -9,7 +9,7 @@ import {
   type WebSocketEvent,
   WebSocketRpc,
 } from "@repo/domain/WebSocket";
-import { Config, Effect, Layer, Mailbox, Stream } from "effect";
+import { Config, Effect, Layer, Mailbox, Queue, Stream } from "effect";
 import { PresenceService } from "./services/PresenceService";
 
 const HealthGroupLive = HttpApiBuilder.group(Api, "health", (handlers) =>
@@ -91,6 +91,7 @@ const PresenceRpcLive = WebSocketRpc.toLayer(
             Stream.runDrain,
             Effect.ensuring(
               Effect.gen(function* () {
+                yield* Queue.shutdown(subscription);
                 yield* presence.removeClient(clientId);
                 yield* mailbox.end;
                 yield* Effect.log(
@@ -180,6 +181,7 @@ const WebSocketRpcRouter = RpcServer.layerHttpRouter({
   path: "/ws",
   protocol: "websocket", // Use WebSocket for PresenceRpc!
   spanPrefix: "ws",
+  disableFatalDefects: true,
 }).pipe(
   Layer.provide(PresenceRpcLive),
   Layer.provide(PresenceService.Default),
