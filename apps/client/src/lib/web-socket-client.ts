@@ -6,7 +6,7 @@ import type { WebSocketEvent } from "@repo/domain/WebSocket";
 import { WebSocketRpc } from "@repo/domain/WebSocket";
 import { type Cause, Effect, Layer, Stream } from "effect";
 
-const WS_URL = import.meta.env["VITE_WS_URL"] || "ws://localhost:9000/ws";
+const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:9000/ws";
 
 export class WebSocketClient extends AtomRpc.Tag<WebSocketClient>()(
   "WebSocketClient",
