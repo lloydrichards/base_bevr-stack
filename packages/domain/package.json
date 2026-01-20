@@ -16,9 +16,9 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@effect/platform": "^0.93.4",
-    "@effect/rpc": "^0.72.2",
-    "effect": "^3.19.10"
+    "@effect/platform": "^0.93.8",
+    "@effect/rpc": "^0.73.0",
+    "effect": "^3.19.14"
   },
   "devDependencies": {
     "@repo/config-typescript": "workspace:*"
