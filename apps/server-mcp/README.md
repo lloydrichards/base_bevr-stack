@@ -24,7 +24,7 @@ bun dev --filter=server-mcp
 # Build for production
 bun build --filter=server-mcp
 
-# Test MCP server functionality
+# Test MCP server functionality (MCPJam Inspector)
 bun inspector
 ```
 
@@ -45,7 +45,7 @@ handling:
 
 ## Testing
 
-You can test the MCP server functionality using the built-in inspector:
+You can test the MCP server functionality using MCPJam Inspector:
 
 ```bash
 bun inspector
