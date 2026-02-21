@@ -13,7 +13,7 @@ jobs:
     # Use Playwright Docker container for consistent visual regression testing
     # Screenshots will match between local Docker runs and CI
     container:
-      image: mcr.microsoft.com/playwright:v1.57.0-noble
+      image: mcr.microsoft.com/playwright:v1.58.2-noble
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
