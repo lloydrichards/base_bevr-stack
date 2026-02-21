@@ -127,7 +127,7 @@ bun dev --filter=server-mcp
 # Build all apps
 bun run build
 
-# Test MCP server functionality
+# Test MCP server functionality (MCPJam Inspector)
 bun inspector --filter=server-mcp
 ```
 

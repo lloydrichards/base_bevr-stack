@@ -7,7 +7,7 @@
     "build": "bun build src/index.ts --outdir=dist --target=bun --minify",
     "build:types": "tsc --emitDeclarationOnly",
     "dev": "bun --watch run src/index.ts",
-    "inspector": "bun run dev & sleep 2 && npx @modelcontextprotocol/inspector; kill %1",
+    "inspector": "bun run dev & sleep 2 && npx @mcpjam/inspector@latest; kill %1",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
     "clean": "git clean -xdf .cache .turbo dist node_modules"
