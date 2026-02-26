@@ -1,7 +1,10 @@
 import { DevTools } from "@effect/experimental";
+import { NodeSdk } from "@effect/opentelemetry";
 import { HttpApiBuilder, HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { RpcSerialization, RpcServer } from "@effect/rpc";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { Api, type ApiResponse } from "@repo/domain/Api";
 import { EventRpc, type TickEvent } from "@repo/domain/Rpc";
 import {
@@ -153,6 +156,12 @@ const ServerConfig = Config.all({
   allowedOrigins: Config.string("ALLOWED_ORIGINS").pipe(
     Config.withDefault("http://localhost:3000"),
   ),
+  enableDevTools: Config.boolean("DEVTOOLS").pipe(Config.withDefault(false)),
+});
+
+const TracingConfig = Config.all({
+  exporterEndpoint: Config.string("OTEL_EXPORTER_OTLP_ENDPOINT"),
+  serviceName: Config.string("OTEL_SERVICE_NAME"),
 });
 
 // ============================================================================
@@ -191,6 +200,24 @@ const WebSocketRpcRouter = RpcServer.layerHttpRouter({
 // ============================================================================
 // Server Launch
 // ============================================================================
+const NodeSdkLive = Effect.gen(function* () {
+  const tracing = yield* TracingConfig;
+  return NodeSdk.layer(() => ({
+    resource: { serviceName: tracing.serviceName },
+    spanProcessor: new BatchSpanProcessor(
+      new OTLPTraceExporter({ url: tracing.exporterEndpoint }),
+    ),
+  }));
+}).pipe(Layer.unwrapEffect);
+
+const DevToolsLive = Effect.gen(function* () {
+  const config = yield* ServerConfig;
+  if (!config.enableDevTools) {
+    return Layer.empty;
+  }
+  yield* Effect.log("Enabling DevTools Layer");
+  return DevTools.layer();
+}).pipe(Layer.unwrapEffect);
 
 const HttpLive = Effect.gen(function* () {
   const config = yield* ServerConfig;
@@ -219,7 +246,8 @@ const HttpLive = Effect.gen(function* () {
 
   return HttpLayerRouter.serve(AllRouters).pipe(
     HttpServer.withLogAddress,
-    Layer.provide(DevTools.layer()),
+    Layer.provideMerge(DevToolsLive),
+    Layer.provideMerge(NodeSdkLive),
     Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig)),
   );
 }).pipe(Layer.unwrapEffect, Layer.launch);
