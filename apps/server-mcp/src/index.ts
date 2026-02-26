@@ -1,6 +1,10 @@
 import { McpServer, Tool, Toolkit } from "@effect/ai";
+import { DevTools } from "@effect/experimental";
+import { NodeSdk } from "@effect/opentelemetry";
 import { HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { Config, Effect, Layer, Schema } from "effect";
 
 // Define Resources
@@ -66,6 +70,12 @@ const McpLive = Layer.mergeAll(ResourceLayer, PromptLayer, ToolLayer);
 
 const ServerConfig = Config.all({
   port: Config.number("MCP_PORT").pipe(Config.withDefault(9009)),
+  enableDevTools: Config.boolean("DEVTOOLS").pipe(Config.withDefault(false)),
+});
+
+const TracingConfig = Config.all({
+  exporterEndpoint: Config.string("OTEL_EXPORTER_OTLP_ENDPOINT"),
+  serviceName: Config.string("OTEL_SERVICE_NAME"),
 });
 
 const McpRouter = McpServer.layerHttpRouter({
@@ -84,8 +94,29 @@ const McpRouter = McpServer.layerHttpRouter({
   ),
 );
 
+const NodeSdkLive = Effect.gen(function* () {
+  const tracing = yield* TracingConfig;
+  return NodeSdk.layer(() => ({
+    resource: { serviceName: tracing.serviceName },
+    spanProcessor: new BatchSpanProcessor(
+      new OTLPTraceExporter({ url: tracing.exporterEndpoint }),
+    ),
+  }));
+}).pipe(Layer.unwrapEffect);
+
+const DevToolsLive = Effect.gen(function* () {
+  const config = yield* ServerConfig;
+  if (!config.enableDevTools) {
+    return Layer.empty;
+  }
+  yield* Effect.log("Enabling DevTools Layer");
+  return DevTools.layer();
+}).pipe(Layer.unwrapEffect);
+
 const HttpLive = HttpLayerRouter.serve(McpRouter).pipe(
   HttpServer.withLogAddress,
+  Layer.provideMerge(DevToolsLive),
+  Layer.provideMerge(NodeSdkLive),
   Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig)),
 );
 
