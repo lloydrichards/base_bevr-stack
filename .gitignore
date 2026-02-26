@@ -46,3 +46,6 @@ yarn-error.log*
 .DS_Store
 *.pem
 tsconfig.tsbuildinfo
+
+# References
+.reference
