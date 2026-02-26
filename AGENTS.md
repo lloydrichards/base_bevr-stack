@@ -56,6 +56,21 @@ Effect.gen(function* () {
 | `apps/server-mcp` | Effect MCP Server    | `apps/server-mcp/AGENTS.md` |
 | `packages/domain` | Effect Schema, RPC   | `packages/domain/AGENTS.md` |
 
+## Local Source References
+
+When answering questions about Effect, search these
+cloned source repos first. When updating dependencies, pull the latest
+commits in these repos to ensure the LLM references current code:
+
+- `.reference/effect/`
+- `.reference/effect-atom/`
+
+If any of the folders are missing (they are git ignored), clone them into
+`reference/`:
+
+- `https://github.com/Effect-TS/effect.git` -> `.reference/effect/`
+- `https://github.com/Effect-TS/effect-atom.git` -> `.reference/effect-atom/`
+
 ---
 
 _This document is a living guide. Update it as the project evolves and new
