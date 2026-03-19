@@ -1,29 +1,29 @@
-import { Prompt } from "@effect/ai";
 import { ChatService } from "@repo/ai";
 import { EventRpc, type TickEvent } from "@repo/domain/Rpc";
-import { Effect, Mailbox } from "effect";
+import { Effect, Queue } from "effect";
+import { Prompt } from "effect/unstable/ai";
 
 export const EventRpcLive = EventRpc.toLayer(
   Effect.gen(function* () {
     const bot = yield* ChatService;
     yield* Effect.log("Starting Event RPC Live Implementation");
-    return {
+    return EventRpc.of({
       tick: Effect.fn(function* (payload) {
         yield* Effect.log("Creating new tick stream");
-        const mailbox = yield* Mailbox.make<typeof TickEvent.Type>();
+        const queue = yield* Queue.unbounded<typeof TickEvent.Type>();
         yield* Effect.forkScoped(
           Effect.gen(function* () {
-            yield* mailbox.offer({ _tag: "starting" });
+            yield* Queue.offer(queue, { _tag: "starting" });
             yield* Effect.sleep("3 seconds");
             for (let i = 0; i < payload.ticks; i++) {
               yield* Effect.sleep("1 second");
-              yield* mailbox.offer({ _tag: "tick" });
+              yield* Queue.offer(queue, { _tag: "tick" });
             }
-            yield* mailbox.offer({ _tag: "end" });
+            yield* Queue.offer(queue, { _tag: "end" });
             yield* Effect.log("End event sent");
-          }).pipe(Effect.ensuring(mailbox.end)),
+          }).pipe(Effect.ensuring(Queue.shutdown(queue))),
         );
-        return mailbox;
+        return queue;
       }),
       chat: ({ messages }) =>
         bot.chat(
@@ -38,6 +38,6 @@ export const EventRpcLive = EventRpc.toLayer(
             });
           }),
         ),
-    };
+    });
   }),
 );

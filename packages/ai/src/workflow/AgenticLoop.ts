@@ -1,29 +1,43 @@
-import type { Chat, Tool, Toolkit } from "@effect/ai";
 import type { ChatStreamPart } from "@repo/domain/Chat";
-import { Effect, type Mailbox, Ref, Schema, Stream } from "effect";
+import { type Cause, Effect, type Queue, Ref, Schema, Stream } from "effect";
+import type {
+  AiError,
+  Chat,
+  LanguageModel,
+  Tool,
+  Toolkit,
+} from "effect/unstable/ai";
 import { createMailboxEvents } from "./MailboxEvents";
 
 export const AgenticLoopState = Schema.Struct({
   finishReason: Schema.String,
   iteration: Schema.Number,
 });
-// Schema for parsing tool parameters (JSON string -> object with unknown keys/values)
 
-export const ToolParamsSchema = Schema.parseJson(
-  Schema.Record({ key: Schema.String, value: Schema.Unknown }),
+export type AgenticLoopResult = Schema.Schema.Type<typeof AgenticLoopState>;
+
+export type AgenticLoopRequirements =
+  | LanguageModel.LanguageModel
+  | Tool.HandlersFor<any>
+  | Tool.HandlerServices<any>
+  | Tool.ResultDecodingServices<any>;
+
+// Schema for parsing tool parameters (JSON string -> object with unknown keys/values)
+export const ToolParamsSchema = Schema.fromJsonString(
+  Schema.Record(Schema.String, Schema.Unknown),
 );
 
-const loop = <TR extends Record<string, Tool.Any>>({
+const loop = ({
   chat,
-  mailbox,
+  queue,
   toolkit,
 }: {
   chat: Chat.Service;
-  mailbox: Mailbox.Mailbox<typeof ChatStreamPart.Type>;
-  toolkit: Toolkit.WithHandler<TR>;
+  queue: Queue.Queue<typeof ChatStreamPart.Type, Cause.Done>;
+  toolkit: Toolkit.WithHandler<any>;
 }) =>
   Effect.gen(function* () {
-    const events = createMailboxEvents(mailbox);
+    const events = createMailboxEvents(queue);
     const finishReasonRef = yield* Ref.make("stop");
     const toolParamsRef = yield* Ref.make(
       new Map<
@@ -104,7 +118,7 @@ const loop = <TR extends Record<string, Tool.Any>>({
                   break;
                 }
 
-                const parsedParams = yield* Schema.decodeUnknown(
+                const parsedParams = yield* Schema.decodeUnknownEffect(
                   ToolParamsSchema,
                 )(toolCall.params?.trim() || "{}").pipe(
                   Effect.tapError((error) =>
@@ -127,15 +141,14 @@ const loop = <TR extends Record<string, Tool.Any>>({
               }
 
               case "tool-result": {
-                const resultText = part.isFailure
-                  ? part.result
-                  : typeof part.result === "string"
+                const resultText =
+                  typeof part.result === "string"
                     ? part.result
                     : JSON.stringify(part.result);
 
                 if (part.isFailure) {
                   yield* Effect.logError(
-                    `⚠️  Tool ${part.name}(${part.id}) failed: ${resultText}`,
+                    `Tool ${part.name}(${part.id}) failed: ${resultText}`,
                   );
                 }
 
@@ -151,9 +164,11 @@ const loop = <TR extends Record<string, Tool.Any>>({
                 yield* Ref.set(finishReasonRef, part.reason);
                 if (part.reason !== "tool-calls") {
                   yield* events.finish(part.reason, {
-                    promptTokens: part.usage.inputTokens ?? 0,
-                    completionTokens: part.usage.outputTokens ?? 0,
-                    totalTokens: part.usage.totalTokens ?? 0,
+                    promptTokens: part.usage.inputTokens.total ?? 0,
+                    completionTokens: part.usage.outputTokens.total ?? 0,
+                    totalTokens:
+                      (part.usage.inputTokens.total ?? 0) +
+                      (part.usage.outputTokens.total ?? 0),
                   });
                 }
                 break;
@@ -173,54 +188,49 @@ const loop = <TR extends Record<string, Tool.Any>>({
             }
           }),
         ),
-        Stream.runDrain,
       );
 
     return yield* Ref.get(finishReasonRef);
   });
 
-export const runAgenticLoop = <TR extends Record<string, Tool.Any>>({
+export const runAgenticLoop = ({
   chat,
-  mailbox,
+  queue,
   toolkit,
   maxIterations = 12,
 }: {
   chat: Chat.Service;
-  mailbox: Mailbox.Mailbox<typeof ChatStreamPart.Type>;
-  toolkit: Toolkit.WithHandler<TR>;
+  queue: Queue.Queue<typeof ChatStreamPart.Type, Cause.Done>;
+  toolkit: Toolkit.WithHandler<any>;
   maxIterations?: number;
-}) =>
+}): Effect.Effect<
+  AgenticLoopResult,
+  AiError.AiError,
+  AgenticLoopRequirements
+> =>
   Effect.gen(function* () {
-    const events = createMailboxEvents(mailbox);
+    const events = createMailboxEvents(queue);
 
-    const finalState = yield* Effect.iterate(
-      {
-        finishReason: "tool-calls",
-        iteration: 0,
-      },
-      {
-        while: (state) =>
-          state.finishReason === "tool-calls" &&
-          state.iteration < maxIterations,
-        body: (state) =>
-          Effect.gen(function* () {
-            const iteration = state.iteration + 1;
+    let state = { finishReason: "tool-calls", iteration: 0 };
 
-            yield* events.iterationStart(iteration);
+    while (
+      state.finishReason === "tool-calls" &&
+      state.iteration < maxIterations
+    ) {
+      const iteration = state.iteration + 1;
 
-            const finishReason = yield* loop({ chat, mailbox, toolkit });
+      yield* events.iterationStart(iteration);
 
-            yield* Effect.log(
-              `Iteration ${iteration} completed with finishReason: ${finishReason}`,
-            );
+      const finishReason = yield* loop({ chat, queue, toolkit });
 
-            return {
-              finishReason,
-              iteration,
-            };
-          }),
-      },
-    );
+      yield* Effect.log(
+        `Iteration ${iteration} completed with finishReason: ${finishReason}`,
+      );
+
+      state = { finishReason, iteration };
+    }
+
+    const finalState = state;
 
     // Handle max iterations case
     if (

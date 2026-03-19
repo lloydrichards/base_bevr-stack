@@ -1,14 +1,15 @@
-import { DevTools } from "@effect/experimental";
-import { HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
-import { RpcSerialization, RpcServer } from "@effect/rpc";
-import { ChatService, FastModelLive, SampleToolkitLive } from "@repo/ai";
+import { ChatServiceLive, FastModelLive, SampleToolkitLive } from "@repo/ai";
 import { Api } from "@repo/domain/Api";
 import { EventRpc } from "@repo/domain/Rpc";
 import { WebSocketRpc } from "@repo/domain/WebSocket";
 import { ObservabilityLive } from "@repo/observability";
-import { PresenceService } from "@repo/presence";
+import { PresenceServiceLive } from "@repo/presence";
 import { Config, Effect, Layer } from "effect";
+import { DevTools } from "effect/unstable/devtools";
+import { HttpRouter, HttpServer } from "effect/unstable/http";
+import { HttpApiBuilder } from "effect/unstable/httpapi";
+import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
 import { HealthGroupLive } from "./Api/Health";
 import { HelloGroupLive } from "./Api/Hello";
 import { EventRpcLive } from "./Rpc/Event";
@@ -21,6 +22,7 @@ import { PresenceRpcLive } from "./Rpc/Presence";
 const ServerConfig = Config.all({
   port: Config.number("PORT").pipe(Config.withDefault(9000)),
   hostname: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
+  idleTimeout: Config.number("IDLE_TIMEOUT").pipe(Config.withDefault(120)), // seconds (Bun default is 10)
   allowedOrigins: Config.string("ALLOWED_ORIGINS").pipe(
     Config.withDefault("http://localhost:3000"),
   ),
@@ -32,26 +34,26 @@ const ServerConfig = Config.all({
 // ============================================================================
 
 // HTTP API Router
-const ApiRouter = HttpLayerRouter.addHttpApi(Api).pipe(
-  Layer.provide(Layer.merge(HealthGroupLive, HelloGroupLive)),
+const ApiRouter = HttpApiBuilder.layer(Api).pipe(
+  Layer.provide([HealthGroupLive, HelloGroupLive]),
 );
 
 // HTTP RPC Router (for EventRpc - streaming over HTTP)
-const HttpRpcRouter = RpcServer.layerHttpRouter({
+const HttpRpcRouter = RpcServer.layerHttp({
   group: EventRpc,
   path: "/rpc",
   protocol: "http", // Use HTTP for EventRpc
   spanPrefix: "rpc",
 }).pipe(
   Layer.provide(EventRpcLive),
-  Layer.provide(ChatService.Default),
+  Layer.provide(ChatServiceLive),
   Layer.provide(SampleToolkitLive),
   Layer.provide(FastModelLive),
   Layer.provide(RpcSerialization.layerNdjson),
 );
 
 // WebSocket RPC Router (for PresenceRpc - real-time presence)
-const WebSocketRpcRouter = RpcServer.layerHttpRouter({
+const WebSocketRpcRouter = RpcServer.layerHttp({
   group: WebSocketRpc,
   path: "/ws",
   protocol: "websocket", // Use WebSocket for PresenceRpc!
@@ -59,7 +61,7 @@ const WebSocketRpcRouter = RpcServer.layerHttpRouter({
   disableFatalDefects: true,
 }).pipe(
   Layer.provide(PresenceRpcLive),
-  Layer.provide(PresenceService.Default),
+  Layer.provide(PresenceServiceLive),
   Layer.provide(RpcSerialization.layerNdjson),
 );
 
@@ -74,7 +76,7 @@ const DevToolsLive = Effect.gen(function* () {
   }
   yield* Effect.log("Enabling DevTools Layer");
   return DevTools.layer();
-}).pipe(Layer.unwrapEffect);
+}).pipe(Layer.unwrap);
 
 const HttpLive = Effect.gen(function* () {
   const config = yield* ServerConfig;
@@ -92,7 +94,7 @@ const HttpLive = Effect.gen(function* () {
     WebSocketRpcRouter,
   ).pipe(
     Layer.provide(
-      HttpLayerRouter.cors({
+      HttpRouter.cors({
         allowedOrigins,
         allowedMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         allowedHeaders: ["Content-Type", "Authorization", "B3", "traceparent"],
@@ -101,12 +103,12 @@ const HttpLive = Effect.gen(function* () {
     ),
   );
 
-  return HttpLayerRouter.serve(AllRouters).pipe(
+  return HttpRouter.serve(AllRouters).pipe(
     HttpServer.withLogAddress,
     Layer.provideMerge(DevToolsLive),
     Layer.provideMerge(ObservabilityLive),
     Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig)),
   );
-}).pipe(Layer.unwrapEffect, Layer.launch);
+}).pipe(Layer.unwrap, Layer.launch);
 
 BunRuntime.runMain(HttpLive);

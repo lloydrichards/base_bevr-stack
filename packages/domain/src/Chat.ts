@@ -4,7 +4,7 @@ import { Schema } from "effect";
 // Wire Protocol: ChatStreamPart
 // ============================================================================
 
-export const ChatStreamPart = Schema.Union(
+export const ChatStreamPart = Schema.Union([
   // Text generation
   Schema.TaggedStruct("text-delta", {
     delta: Schema.String,
@@ -67,7 +67,7 @@ export const ChatStreamPart = Schema.Union(
     message: Schema.String,
     recoverable: Schema.Boolean,
   }),
-);
+]);
 
 export type ChatStreamPart = Schema.Schema.Type<typeof ChatStreamPart>;
 
@@ -76,7 +76,7 @@ export type ChatStreamPart = Schema.Schema.Type<typeof ChatStreamPart>;
 // ============================================================================
 
 export const ChatMessage = Schema.Struct({
-  role: Schema.Literal("user", "assistant", "system"),
+  role: Schema.Literals(["user", "assistant", "system"]),
   content: Schema.String,
 });
 
@@ -91,14 +91,14 @@ export const ToolCall = Schema.Struct({
   name: Schema.String,
   arguments: Schema.Unknown,
   argumentsText: Schema.String,
-  status: Schema.Literal("proposed", "executing", "complete", "failed"),
+  status: Schema.Literals(["proposed", "executing", "complete", "failed"]),
   result: Schema.optional(Schema.String),
   success: Schema.optional(Schema.Boolean),
 });
 
 export type ToolCall = Schema.Schema.Type<typeof ToolCall>;
 
-export const MessageSegment = Schema.Union(
+export const MessageSegment = Schema.Union([
   Schema.TaggedStruct("text", {
     content: Schema.String,
     isComplete: Schema.Boolean,
@@ -106,7 +106,7 @@ export const MessageSegment = Schema.Union(
   Schema.TaggedStruct("tool-call", {
     tool: ToolCall,
   }),
-);
+]);
 
 export type MessageSegment = Schema.Schema.Type<typeof MessageSegment>;
 
@@ -125,7 +125,7 @@ export const ErrorMetadata = Schema.Struct({
 
 export type ErrorMetadata = Schema.Schema.Type<typeof ErrorMetadata>;
 
-export const ChatResponse = Schema.Union(
+export const ChatResponse = Schema.Union([
   Schema.TaggedStruct("initial", {}),
   Schema.TaggedStruct("streaming", {
     segments: Schema.Array(MessageSegment),
@@ -141,6 +141,6 @@ export const ChatResponse = Schema.Union(
     segments: Schema.Array(MessageSegment),
     error: ErrorMetadata,
   }),
-);
+]);
 
 export type ChatResponse = Schema.Schema.Type<typeof ChatResponse>;
