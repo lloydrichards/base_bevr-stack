@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/Api.ts",
     "./Api": "./src/Api.ts",
+    "./Chat": "./src/Chat.ts",
     "./Rpc": "./src/Rpc.ts",
     "./WebSocket": "./src/WebSocket.ts"
   },
