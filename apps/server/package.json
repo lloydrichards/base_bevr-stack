@@ -12,10 +12,12 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules"
   },
   "dependencies": {
+    "@effect/ai": "^0.34.0",
     "@effect/experimental": "^0.59.0",
     "@effect/platform": "^0.95.0",
     "@effect/platform-bun": "^0.88.0",
     "@effect/rpc": "^0.74.0",
+    "@repo/ai": "workspace:*",
     "@repo/domain": "workspace:*",
     "@repo/observability": "workspace:*",
     "effect": "3.20.0"

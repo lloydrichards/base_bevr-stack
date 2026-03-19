@@ -1,7 +1,9 @@
+import { Prompt } from "@effect/ai";
 import { DevTools } from "@effect/experimental";
 import { HttpApiBuilder, HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { RpcSerialization, RpcServer } from "@effect/rpc";
+import { ChatService, FastModelLive, SampleToolkitLive } from "@repo/ai";
 import { Api, type ApiResponse } from "@repo/domain/Api";
 import { EventRpc, type TickEvent } from "@repo/domain/Rpc";
 import {
@@ -29,6 +31,7 @@ const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
 
 const EventRpcLive = EventRpc.toLayer(
   Effect.gen(function* () {
+    const bot = yield* ChatService;
     yield* Effect.log("Starting Event RPC Live Implementation");
     return {
       tick: Effect.fn(function* (payload) {
@@ -48,6 +51,19 @@ const EventRpcLive = EventRpc.toLayer(
         );
         return mailbox;
       }),
+      chat: ({ messages }) =>
+        bot.chat(
+          messages.map((msg) => {
+            if (msg.role === "system") {
+              return Prompt.makeMessage(msg.role, {
+                content: msg.content,
+              });
+            }
+            return Prompt.makeMessage(msg.role, {
+              content: [Prompt.makePart("text", { text: msg.content })],
+            });
+          }),
+        ),
     };
   }),
 );
@@ -174,6 +190,9 @@ const HttpRpcRouter = RpcServer.layerHttpRouter({
   spanPrefix: "rpc",
 }).pipe(
   Layer.provide(EventRpcLive),
+  Layer.provide(ChatService.Default),
+  Layer.provide(SampleToolkitLive),
+  Layer.provide(FastModelLive),
   Layer.provide(RpcSerialization.layerNdjson),
 );
 
