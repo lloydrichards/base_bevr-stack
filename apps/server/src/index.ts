@@ -1,10 +1,7 @@
 import { DevTools } from "@effect/experimental";
-import { NodeSdk } from "@effect/opentelemetry";
 import { HttpApiBuilder, HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { RpcSerialization, RpcServer } from "@effect/rpc";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { Api, type ApiResponse } from "@repo/domain/Api";
 import { EventRpc, type TickEvent } from "@repo/domain/Rpc";
 import {
@@ -12,7 +9,8 @@ import {
   type WebSocketEvent,
   WebSocketRpc,
 } from "@repo/domain/WebSocket";
-import { Config, Effect, Layer, Mailbox, Option, Queue, Stream } from "effect";
+import { ObservabilityLive } from "@repo/observability";
+import { Config, Effect, Layer, Mailbox, Queue, Stream } from "effect";
 import { PresenceService } from "./services/PresenceService";
 
 const HealthGroupLive = HttpApiBuilder.group(Api, "health", (handlers) =>
@@ -159,11 +157,6 @@ const ServerConfig = Config.all({
   enableDevTools: Config.boolean("DEVTOOLS").pipe(Config.withDefault(false)),
 });
 
-const TracingConfig = Config.all({
-  exporterEndpoint: Config.option(Config.string("OTEL_EXPORTER_OTLP_ENDPOINT")),
-  serviceName: Config.option(Config.string("OTEL_SERVICE_NAME")),
-});
-
 // ============================================================================
 // Router Composition
 // ============================================================================
@@ -200,26 +193,6 @@ const WebSocketRpcRouter = RpcServer.layerHttpRouter({
 // ============================================================================
 // Server Launch
 // ============================================================================
-const NodeSdkLive = Effect.gen(function* () {
-  const tracing = yield* TracingConfig;
-  const endpoint = Option.getOrUndefined(tracing.exporterEndpoint);
-  const serviceName = Option.getOrUndefined(tracing.serviceName);
-
-  if (!endpoint || !serviceName) {
-    yield* Effect.log(
-      "OTEL tracing disabled (set OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_SERVICE_NAME to enable)",
-    );
-    return Layer.empty;
-  }
-
-  yield* Effect.log(`OTEL tracing enabled: ${serviceName} -> ${endpoint}`);
-  return NodeSdk.layer(() => ({
-    resource: { serviceName },
-    spanProcessor: new BatchSpanProcessor(
-      new OTLPTraceExporter({ url: endpoint }),
-    ),
-  }));
-}).pipe(Layer.unwrapEffect);
 
 const DevToolsLive = Effect.gen(function* () {
   const config = yield* ServerConfig;
@@ -258,7 +231,7 @@ const HttpLive = Effect.gen(function* () {
   return HttpLayerRouter.serve(AllRouters).pipe(
     HttpServer.withLogAddress,
     Layer.provideMerge(DevToolsLive),
-    Layer.provideMerge(NodeSdkLive),
+    Layer.provideMerge(ObservabilityLive),
     Layer.provideMerge(BunHttpServer.layerConfig(ServerConfig)),
   );
 }).pipe(Layer.unwrapEffect, Layer.launch);
