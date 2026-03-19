@@ -18,7 +18,7 @@ generation.
 
 ## Usage
 
-Import types and schemas in your apps:
+Import schemas in your apps:
 
 ```typescript
 // In client or server
