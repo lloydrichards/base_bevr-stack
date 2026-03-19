@@ -12,7 +12,7 @@ import {
   type WebSocketEvent,
   WebSocketRpc,
 } from "@repo/domain/WebSocket";
-import { Config, Effect, Layer, Mailbox, Queue, Stream } from "effect";
+import { Config, Effect, Layer, Mailbox, Option, Queue, Stream } from "effect";
 import { PresenceService } from "./services/PresenceService";
 
 const HealthGroupLive = HttpApiBuilder.group(Api, "health", (handlers) =>
@@ -160,8 +160,8 @@ const ServerConfig = Config.all({
 });
 
 const TracingConfig = Config.all({
-  exporterEndpoint: Config.string("OTEL_EXPORTER_OTLP_ENDPOINT"),
-  serviceName: Config.string("OTEL_SERVICE_NAME"),
+  exporterEndpoint: Config.option(Config.string("OTEL_EXPORTER_OTLP_ENDPOINT")),
+  serviceName: Config.option(Config.string("OTEL_SERVICE_NAME")),
 });
 
 // ============================================================================
@@ -202,10 +202,21 @@ const WebSocketRpcRouter = RpcServer.layerHttpRouter({
 // ============================================================================
 const NodeSdkLive = Effect.gen(function* () {
   const tracing = yield* TracingConfig;
+  const endpoint = Option.getOrUndefined(tracing.exporterEndpoint);
+  const serviceName = Option.getOrUndefined(tracing.serviceName);
+
+  if (!endpoint || !serviceName) {
+    yield* Effect.log(
+      "OTEL tracing disabled (set OTEL_EXPORTER_OTLP_ENDPOINT and OTEL_SERVICE_NAME to enable)",
+    );
+    return Layer.empty;
+  }
+
+  yield* Effect.log(`OTEL tracing enabled: ${serviceName} -> ${endpoint}`);
   return NodeSdk.layer(() => ({
-    resource: { serviceName: tracing.serviceName },
+    resource: { serviceName },
     spanProcessor: new BatchSpanProcessor(
-      new OTLPTraceExporter({ url: tracing.exporterEndpoint }),
+      new OTLPTraceExporter({ url: endpoint }),
     ),
   }));
 }).pipe(Layer.unwrapEffect);
