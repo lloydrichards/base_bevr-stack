@@ -1,6 +1,6 @@
-import type { Atom } from "@effect-atom/atom-react";
 import type { ChatMessage, ChatResponse, ToolCall } from "@repo/domain/Chat";
 import { Effect, Stream } from "effect";
+import type { Atom } from "effect/unstable/reactivity";
 import { runtime } from "../atom";
 import { RpcClient } from "../rpc-client";
 
@@ -242,7 +242,7 @@ export const chatAtom: Atom.AtomResultFn<
       },
     ),
     Stream.drop(1),
-    Stream.catchAll((error: unknown) => {
+    Stream.catch((error: unknown) => {
       console.error("[chatAtom] Caught unhandled stream error:", error);
       const errorMessage =
         error instanceof Error

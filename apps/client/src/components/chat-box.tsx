@@ -1,5 +1,6 @@
-import { Result, useAtom } from "@effect-atom/atom-react";
+import { useAtom } from "@effect/atom-react";
 import type { ChatResponse, MessageSegment } from "@repo/domain/Chat";
+import { AsyncResult } from "effect/unstable/reactivity";
 import { AlertCircle, Loader2, Send } from "lucide-react";
 import { type FC, useEffect, useMemo, useRef, useState } from "react";
 import { chatAtom } from "@/lib/atoms/chat-atom";
@@ -46,7 +47,7 @@ export function ChatBox() {
   const readinessAttemptRef = useRef(0);
   const lastCompletionKeyRef = useRef<string | null>(null);
 
-  const currentResult: ChatResponse = Result.getOrElse(
+  const currentResult: ChatResponse = AsyncResult.getOrElse(
     result,
     () => ({ _tag: "initial" }) as const,
   );
@@ -54,8 +55,8 @@ export function ChatBox() {
   const currentSegments =
     currentResult._tag === "initial" ? [] : currentResult.segments;
 
-  const isWaiting = Result.isWaiting(result);
-  const isFailure = Result.isFailure(result);
+  const isWaiting = AsyncResult.isWaiting(result);
+  const isFailure = AsyncResult.isFailure(result);
   const isStreaming = currentResult._tag === "streaming";
   const sendMessages = (
     messages: Array<{
@@ -341,7 +342,7 @@ const historyToMessages = (messages: Message[]) =>
   });
 
 const ErrorDisplay: FC<{
-  result: Result.Failure<unknown, unknown>;
+  result: AsyncResult.Failure<unknown, unknown>;
 }> = ({ result }) => {
   return (
     <div className="flex w-full justify-center">
