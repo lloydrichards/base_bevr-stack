@@ -15,12 +15,12 @@
   },
   "devDependencies": {
     "@effect/language-service": "0.85.1",
-    "@biomejs/biome": "2.4.8",
-    "@playwright/test": "^1.58.2",
-    "@types/bun": "^1.3.11",
-    "turbo": "^2.8.20",
+    "@biomejs/biome": "2.4.11",
+    "@playwright/test": "^1.59.1",
+    "@types/bun": "^1.3.12",
+    "turbo": "^2.9.6",
     "typescript": "6.0.2",
-    "vitest": "^4.1.1"
+    "vitest": "^4.1.4"
   },
   "engines": {
     "node": ">=18"

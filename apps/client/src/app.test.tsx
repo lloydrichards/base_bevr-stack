@@ -2,38 +2,37 @@ import { describe, expect, test, vi } from "vitest";
 import { render } from "vitest-browser-react";
 import App from "./app";
 
-// Mock the atom hooks to avoid real API calls
-vi.mock("@effect-atom/atom-react", () => ({
-  Result: {
+// Mock the atom hooks (v4: @effect/atom-react)
+vi.mock("@effect/atom-react", () => ({
+  useAtom: vi.fn(() => [{ _tag: "Initial" }, vi.fn()]),
+  useAtomSet: vi.fn(() => vi.fn()),
+}));
+
+// Mock AsyncResult from effect/unstable/reactivity
+vi.mock("effect/unstable/reactivity", () => ({
+  AsyncResult: {
     getOrElse: vi.fn((_result: unknown, fallback: () => unknown) => {
       return fallback();
     }),
-    match: vi.fn(
-      (_result: unknown, handlers: Record<string, () => unknown>) => {
-        return handlers["onInitial"] ? handlers["onInitial"]() : null;
-      },
-    ),
     builder: vi.fn(() => ({
       onSuccess: vi.fn().mockReturnThis(),
       onFailure: vi.fn().mockReturnThis(),
       onInitial: vi.fn().mockReturnThis(),
       orNull: vi.fn(() => null),
     })),
+    match: vi.fn((_result: unknown, _handlers: unknown) => null),
     isSuccess: vi.fn(() => false),
     isInitial: vi.fn(() => true),
     isFailure: vi.fn(() => false),
     isWaiting: vi.fn(() => false),
   },
-  useAtom: vi.fn(() => [{ _tag: "Initial" }, vi.fn()]),
-  useAtomSet: vi.fn(() => vi.fn()),
 }));
 
 vi.mock("./lib/atom", () => ({
+  runtime: { fn: vi.fn(() => vi.fn()) },
   helloAtom: vi.fn(),
   tickAtom: vi.fn(),
-  runtime: {
-    fn: vi.fn(() => vi.fn()),
-  },
+  chatAtom: vi.fn(),
 }));
 
 vi.mock("./lib/web-socket-client", () => ({
