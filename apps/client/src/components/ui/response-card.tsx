@@ -1,4 +1,5 @@
 import type * as React from "react";
+import { cn } from "@/lib/utils";
 
 export type ResponseState = "loading" | "completed" | "error";
 
@@ -6,6 +7,7 @@ type ResponseCardProps = {
   title: string;
   state?: ResponseState;
   children: React.ReactNode;
+  className?: string;
 };
 
 const stateStyles = {
@@ -35,9 +37,19 @@ const stateLabels = {
   error: "Error",
 } as const;
 
-export function ResponseCard({ title, state, children }: ResponseCardProps) {
+export function ResponseCard({
+  title,
+  state,
+  children,
+  className,
+}: ResponseCardProps) {
   return (
-    <div className="min-h-42 rounded-lg border border-gray-200 bg-gray-50 p-4">
+    <div
+      className={cn(
+        "min-h-42 rounded-lg border border-gray-200 bg-gray-50 p-4",
+        className,
+      )}
+    >
       <h4 className="mb-3 font-medium text-gray-700 text-sm uppercase tracking-wide">
         {title}
       </h4>

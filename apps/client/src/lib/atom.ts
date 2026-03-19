@@ -9,7 +9,7 @@ import { RpcClient } from "./rpc-client";
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:9000";
 const ENABLE_DEVTOOLS = import.meta.env.VITE_ENABLE_DEVTOOLS === "true";
 
-const runtime = Atom.runtime(
+export const runtime = Atom.runtime(
   RpcClient.Default.pipe(
     Layer.provideMerge(ENABLE_DEVTOOLS ? DevTools.layer() : Layer.empty),
   ),

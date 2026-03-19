@@ -6,6 +6,7 @@ import type {
   WebSocketEvent,
 } from "@repo/domain/WebSocket";
 import { useEffect, useMemo } from "react";
+import { cn } from "@/lib/utils";
 import {
   presenceSubscriptionAtom,
   WebSocketClient,
@@ -59,7 +60,7 @@ const buildClientListFromEvents = (
   return { clients, myClientId };
 };
 
-export function PresencePanel() {
+export function PresencePanel({ className }: { className?: string }) {
   const [eventsResult, startSubscription] = useAtom(presenceSubscriptionAtom);
 
   const setStatus = useAtomSet(WebSocketClient.mutation("setStatus"));
@@ -110,7 +111,12 @@ export function PresencePanel() {
   const hasError = Result.isFailure(eventsResult);
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+    <div
+      className={cn(
+        "flex h-full flex-col gap-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm",
+        className,
+      )}
+    >
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-gray-800 text-lg">
           WebSocket Presence (RPC)
