@@ -3,6 +3,7 @@ import bun from "./assets/bun.svg";
 import effect from "./assets/effect.svg";
 import react from "./assets/react.svg";
 import vite from "./assets/vite.svg";
+import { ChatBox } from "./components/chat-box";
 import { Button } from "./components/ui/button";
 import { PresencePanel } from "./components/ui/presence-panel";
 import { ResponseCard } from "./components/ui/response-card";
@@ -36,13 +37,16 @@ function App() {
         <p className="text-gray-600">A typesafe fullstack monorepo</p>
       </div>
 
-      {/* WebSocket Presence Panel */}
-      <div className="w-full max-w-md">
-        <PresencePanel />
-      </div>
+      <div className="grid w-full grid-cols-1 gap-6 auto-rows-[30rem] lg:auto-rows-[22rem] lg:grid-cols-2">
+        <div className="h-full">
+          <ChatBox />
+        </div>
 
-      <div className="grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-2">
-        <div className="flex flex-col gap-4">
+        <div className="h-full">
+          <PresencePanel className="h-full" />
+        </div>
+
+        <div className="flex h-full flex-col gap-4">
           <div className="flex flex-col items-center gap-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <h3 className="font-semibold text-gray-800 text-lg">REST API</h3>
             <Button className="w-full" onClick={handleApiCall} size="lg">
@@ -51,7 +55,11 @@ function App() {
           </div>
           {Result.builder(response)
             .onSuccess((data) => (
-              <ResponseCard state="completed" title="REST API Response">
+              <ResponseCard
+                state="completed"
+                title="REST API Response"
+                className="flex-1"
+              >
                 <pre>
                   <code>
                     Message: {data.message}
@@ -62,7 +70,11 @@ function App() {
               </ResponseCard>
             ))
             .onFailure((error) => (
-              <ResponseCard state="error" title="REST API Response">
+              <ResponseCard
+                state="error"
+                title="REST API Response"
+                className="flex-1"
+              >
                 <pre>
                   <code>
                     Error: {error._tag}
@@ -73,14 +85,14 @@ function App() {
               </ResponseCard>
             ))
             .onInitial(() => (
-              <ResponseCard title="REST API Response">
+              <ResponseCard title="REST API Response" className="flex-1">
                 Click the button above to test the REST API
               </ResponseCard>
             ))
             .orNull()}
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex h-full flex-col gap-4">
           <div className="flex flex-col items-center gap-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             <h3 className="font-semibold text-gray-800 text-lg">RPC API</h3>
             <Button className="w-full" onClick={handleSearch} size="lg">
@@ -92,6 +104,7 @@ function App() {
             <ResponseCard
               state={event.event._tag === "end" ? "completed" : "loading"}
               title="RPC API Response"
+              className="flex-1"
             >
               <pre>
                 <code>
@@ -102,7 +115,7 @@ function App() {
               </pre>
             </ResponseCard>
           ) : (
-            <ResponseCard title="RPC API Response">
+            <ResponseCard title="RPC API Response" className="flex-1">
               Click the button above to test the RPC API
             </ResponseCard>
           )}

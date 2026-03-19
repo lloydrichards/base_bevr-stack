@@ -8,6 +8,11 @@ vi.mock("@effect-atom/atom-react", () => ({
     getOrElse: vi.fn((_result: unknown, fallback: () => unknown) => {
       return fallback();
     }),
+    match: vi.fn(
+      (_result: unknown, handlers: Record<string, () => unknown>) => {
+        return handlers["onInitial"] ? handlers["onInitial"]() : null;
+      },
+    ),
     builder: vi.fn(() => ({
       onSuccess: vi.fn().mockReturnThis(),
       onFailure: vi.fn().mockReturnThis(),
@@ -17,6 +22,7 @@ vi.mock("@effect-atom/atom-react", () => ({
     isSuccess: vi.fn(() => false),
     isInitial: vi.fn(() => true),
     isFailure: vi.fn(() => false),
+    isWaiting: vi.fn(() => false),
   },
   useAtom: vi.fn(() => [{ _tag: "Initial" }, vi.fn()]),
   useAtomSet: vi.fn(() => vi.fn()),
@@ -25,6 +31,9 @@ vi.mock("@effect-atom/atom-react", () => ({
 vi.mock("./lib/atom", () => ({
   helloAtom: vi.fn(),
   tickAtom: vi.fn(),
+  runtime: {
+    fn: vi.fn(() => vi.fn()),
+  },
 }));
 
 vi.mock("./lib/web-socket-client", () => ({
