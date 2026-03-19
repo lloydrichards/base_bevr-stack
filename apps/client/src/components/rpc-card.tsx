@@ -1,4 +1,5 @@
-import { Result, useAtom } from "@effect-atom/atom-react";
+import { useAtom } from "@effect/atom-react";
+import { AsyncResult } from "effect/unstable/reactivity";
 import { tickAtom } from "@/lib/atoms/tick-atom";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -6,7 +7,7 @@ import { ResponseCard } from "./ui/response-card";
 
 export const RpcCard = () => {
   const [result, search] = useAtom(tickAtom);
-  const event = Result.getOrElse(result, () => null);
+  const event = AsyncResult.getOrElse(result, () => null);
 
   const handleSearch = () => {
     search({ abort: false });
