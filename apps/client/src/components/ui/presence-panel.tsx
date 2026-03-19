@@ -113,12 +113,12 @@ export function PresencePanel({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex h-full flex-col gap-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm",
+        "flex h-full flex-col gap-4 rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm",
         className,
       )}
     >
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-800 text-lg">
+        <h3 className="font-semibold text-foreground text-lg">
           WebSocket Presence (RPC)
         </h3>
         <span
@@ -127,7 +127,7 @@ export function PresencePanel({ className }: { className?: string }) {
               ? "text-green-600"
               : isConnecting
                 ? "text-yellow-600"
-                : "text-red-600"
+                : "text-destructive"
           }`}
         >
           {isConnected && myClientId
@@ -144,7 +144,7 @@ export function PresencePanel({ className }: { className?: string }) {
           onInitial: () => null,
           onSuccess: () => null,
           onFailure: (error) => (
-            <div className="rounded bg-red-100 p-2 text-red-700 text-sm">
+            <div className="rounded bg-destructive/10 p-2 text-destructive text-sm">
               Error: {String(error)}
             </div>
           ),
@@ -179,12 +179,12 @@ export function PresencePanel({ className }: { className?: string }) {
       </div>
 
       {/* Connected Clients */}
-      <div className="rounded border border-gray-100 bg-gray-50 p-3">
-        <h4 className="mb-2 font-medium text-gray-700 text-sm">
+      <div className="rounded border border-border bg-muted/50 p-3">
+        <h4 className="mb-2 font-medium text-foreground text-sm">
           Connected Clients ({clients.length})
         </h4>
         {clients.length === 0 ? (
-          <p className="text-gray-500 text-sm">No clients connected</p>
+          <p className="text-muted-foreground text-sm">No clients connected</p>
         ) : (
           <ul className="space-y-1">
             {clients.map((client: ClientInfo) => (
@@ -197,12 +197,12 @@ export function PresencePanel({ className }: { className?: string }) {
                     client.status,
                   )}`}
                 />
-                <span className="font-mono text-gray-600">
+                <span className="font-mono text-muted-foreground">
                   {client.clientId.slice(0, 8)}...
                 </span>
-                <span className="text-gray-400">({client.status})</span>
+                <span className="text-muted-foreground">({client.status})</span>
                 {client.clientId === myClientId && (
-                  <span className="text-blue-500 text-xs">(you)</span>
+                  <span className="text-primary text-xs">(you)</span>
                 )}
               </li>
             ))}

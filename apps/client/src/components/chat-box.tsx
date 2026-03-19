@@ -148,7 +148,7 @@ export function ChatBox() {
     <div className="flex h-full w-full flex-col rounded-lg border border-border shadow-sm bg-card text-card-foreground">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border px-6 py-4">
-        <h3 className="font-semibold text-gray-800 text-lg">Chat (RPC)</h3>
+        <h3 className="font-semibold text-foreground text-lg">Chat (RPC)</h3>
 
         <div className="flex gap-2">
           {isStreaming && (

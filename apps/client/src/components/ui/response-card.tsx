@@ -12,22 +12,22 @@ type ResponseCardProps = {
 
 const stateStyles = {
   loading: {
-    container: "border-blue-200 bg-blue-50",
+    container: "border-primary/30 bg-primary/10",
     dot: "bg-blue-500",
-    text: "text-blue-800",
-    subText: "text-blue-700",
+    text: "text-primary",
+    subText: "text-primary",
   },
   completed: {
-    container: "border-green-200 bg-green-50",
+    container: "border-primary/30 bg-primary/10",
     dot: "bg-green-500",
-    text: "text-green-800",
-    subText: "text-green-700",
+    text: "text-primary",
+    subText: "text-primary",
   },
   error: {
-    container: "border-red-200 bg-red-50",
+    container: "border-destructive/40 bg-destructive/10",
     dot: "bg-red-500",
-    text: "text-red-800",
-    subText: "text-red-700",
+    text: "text-destructive",
+    subText: "text-destructive",
   },
 } as const;
 
@@ -46,11 +46,11 @@ export function ResponseCard({
   return (
     <div
       className={cn(
-        "min-h-42 rounded-lg border border-gray-200 bg-gray-50 p-4",
+        "min-h-42 rounded-lg border border-border bg-card p-4 text-card-foreground",
         className,
       )}
     >
-      <h4 className="mb-3 font-medium text-gray-700 text-sm uppercase tracking-wide">
+      <h4 className="mb-3 font-medium text-muted-foreground text-sm uppercase tracking-wide">
         {title}
       </h4>
       {state ? (
@@ -72,7 +72,7 @@ export function ResponseCard({
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-center py-8 text-gray-500 text-sm">
+        <div className="flex items-center justify-center py-8 text-muted-foreground text-sm">
           {children}
         </div>
       )}
