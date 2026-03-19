@@ -69,6 +69,6 @@ const TracingLive = Effect.gen(function* () {
       new OTLPTraceExporter({ url: endpoint }),
     ),
   }));
-}).pipe(Layer.unwrapEffect);
+}).pipe(Layer.unwrap);
 
 export const ObservabilityLive = Layer.mergeAll(LogLevelLive, TracingLive);
