@@ -1,9 +1,9 @@
-import { McpServer, Tool, Toolkit } from "@effect/ai";
-import { DevTools } from "@effect/experimental";
-import { HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { ObservabilityLive } from "@repo/observability";
 import { Config, Effect, Layer, Schema } from "effect";
+import { McpServer, Tool, Toolkit } from "effect/unstable/ai";
+import { DevTools } from "effect/unstable/devtools";
+import { HttpRouter, HttpServer } from "effect/unstable/http";
 
 // Define Resources
 const ResourceLayer = Layer.mergeAll(
@@ -23,9 +23,9 @@ const PromptLayer = Layer.mergeAll(
   McpServer.prompt({
     name: "Hello Prompt",
     description: "A simple greeting prompt",
-    parameters: Schema.Struct({
+    parameters: {
       name: Schema.String,
-    }),
+    },
     content: ({ name }) =>
       Effect.succeed(
         `Hello, ${name}! Welcome to the MCP server demonstration.`,
@@ -40,26 +40,24 @@ class AiTools extends Toolkit.make(
     description: "Get a hilarious dad joke from the ICanHazDadJoke API",
     success: Schema.String,
     failure: Schema.Never,
-    parameters: {
-      searchTerm: Schema.String.annotations({
+    parameters: Schema.Struct({
+      searchTerm: Schema.String.annotate({
         description: "The search term to use to find dad jokes",
       }),
-    },
+    }),
   }),
   // You can add more tools here
 ) {}
 
 const ToolLayer = McpServer.toolkit(AiTools).pipe(
   Layer.provide(
-    AiTools.toLayer(
-      Effect.succeed({
-        GetDadJoke: ({ searchTerm }) =>
-          Effect.succeed(
-            `Here's a dad joke about ${searchTerm}: Why don't ${searchTerm}s ever get lost? Because they always follow the map!`,
-          ),
-        // add implementation for more tools here
-      }),
-    ),
+    AiTools.toLayer({
+      GetDadJoke: (params) =>
+        Effect.succeed(
+          `Here's a dad joke about ${params.searchTerm}: Why don't ${params.searchTerm}s ever get lost? Because they always follow the map!`,
+        ),
+      // add implementation for more tools here
+    }),
   ),
 );
 
@@ -71,14 +69,14 @@ const ServerConfig = Config.all({
   enableDevTools: Config.boolean("DEVTOOLS").pipe(Config.withDefault(false)),
 });
 
-const McpRouter = McpServer.layerHttpRouter({
+const McpRouter = McpServer.layerHttp({
   name: "BEVR MCP Server",
   version: "0.1.0",
   path: "/mcp",
 }).pipe(
   Layer.provideMerge(McpLive),
   Layer.provide(
-    HttpLayerRouter.cors({
+    HttpRouter.cors({
       allowedOrigins: ["*"],
       allowedMethods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: ["Content-Type", "Authorization", "mcp-protocol-version"],
@@ -94,9 +92,9 @@ const DevToolsLive = Effect.gen(function* () {
   }
   yield* Effect.logInfo("Enabling DevTools Layer");
   return DevTools.layer();
-}).pipe(Layer.unwrapEffect);
+}).pipe(Layer.unwrap);
 
-const HttpLive = HttpLayerRouter.serve(McpRouter).pipe(
+const HttpLive = HttpRouter.serve(McpRouter).pipe(
   HttpServer.withLogAddress,
   Layer.provideMerge(DevToolsLive),
   Layer.provideMerge(ObservabilityLive),
