@@ -6,9 +6,9 @@ React frontend built with Vite and TypeScript, part of the
 ## Stack
 
 - **React 19** - UI framework
-- **Vite** - Build tool and dev server
+- **Vite 8** - Build tool and dev server
 - **TypeScript** - Type safety
-- **Effect** - Functional programming utilities
+- **Effect 4-beta** - Functional programming utilities
 - **@repo/domain** - Shared types and schemas
 
 ## Getting Started

@@ -65,7 +65,7 @@ bun format
 bun lint
 
 # Type check
-bun type-check
+bun run type-check
 ```
 
 ### Testing
