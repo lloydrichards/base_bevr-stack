@@ -1,64 +1,75 @@
-import { Chat, Prompt, Toolkit } from "@effect/ai";
 import type { ChatStreamPart } from "@repo/domain/Chat";
-import { Cause, Effect, Mailbox, String } from "effect";
+import { Cause, Context, Effect, Layer, Queue, String } from "effect";
+import { Chat, type LanguageModel, Prompt } from "effect/unstable/ai";
 import { SampleToolkit } from "../toolkits/SampleToolkit";
 import { runAgenticLoop } from "../workflow/AgenticLoop";
 
-export class ChatService extends Effect.Service<ChatService>()("ChatService", {
-  scoped: Effect.gen(function* () {
-    const chat = Effect.fn("craftsman")(function* (
-      history: Array<Prompt.Message>,
-    ) {
-      // Create mailbox for streaming events
-      const mailbox = yield* Mailbox.make<typeof ChatStreamPart.Type>();
+export type ChatServiceApi = {
+  chat: (
+    history: Array<Prompt.Message>,
+  ) => Effect.Effect<
+    Queue.Queue<typeof ChatStreamPart.Type, Cause.Done>,
+    never,
+    LanguageModel.LanguageModel
+  >;
+};
+export class ChatService extends Context.Service<ChatServiceApi>()(
+  "ChatService",
+  {
+    make: Effect.gen(function* () {
+      const chat = Effect.fn("chat")(function* (
+        history: Array<Prompt.Message>,
+      ) {
+        const queue = yield* Queue.make<
+          typeof ChatStreamPart.Type,
+          Cause.Done
+        >();
 
-      // Fork the agentic loop to run in background
-      yield* Effect.forkScoped(
-        Effect.gen(function* () {
-          yield* Effect.logInfo(
-            `[craftsman] Creating chat with ${1 + history.length} messages`,
-          );
-          const systemMessage = String.stripMargin(`
+        yield* Effect.forkScoped(
+          Effect.gen(function* () {
+            yield* Effect.logInfo(
+              `[craftsman] Creating chat with ${1 + history.length} messages`,
+            );
+
+            const systemMessage = String.stripMargin(`
               |You are a helpful general assistant.
               |You have access to tools and should use them when appropriate.
               |Be concise and direct in your responses.
             `);
 
-          const session = yield* Chat.fromPrompt(
-            Prompt.make(history).pipe(Prompt.setSystem(systemMessage)),
-          );
+            const prompt = Prompt.make(history).pipe(
+              Prompt.setSystem(systemMessage),
+            );
+            const session = yield* Chat.fromPrompt(prompt);
 
-          yield* Effect.logTrace(
-            Prompt.make(history).pipe(Prompt.setSystem(systemMessage)),
-          );
-          yield* Effect.logTrace(yield* session.exportJson);
+            const toolkit = yield* SampleToolkit;
 
-          const toolkit = yield* Toolkit.merge(SampleToolkit);
-
-          yield* runAgenticLoop({
-            chat: session,
-            mailbox,
-            toolkit,
-          });
-        }).pipe(
-          Effect.ensuring(mailbox.end),
-          Effect.catchAllCause((cause) =>
-            Effect.gen(function* () {
-              yield* Effect.logError(`Agentic loop error: ${cause}`);
-              yield* mailbox.offer({
-                _tag: "error",
-                message: `System error: ${Cause.pretty(cause)}`,
-                recoverable: false,
-              });
-              yield* mailbox.end;
-            }),
+            yield* runAgenticLoop({
+              chat: session,
+              queue,
+              toolkit,
+            });
+          }).pipe(
+            Effect.catchCause((cause) =>
+              Effect.gen(function* () {
+                yield* Effect.logError(`Chat error: ${cause}`);
+                yield* Queue.offer(queue, {
+                  _tag: "error",
+                  message: `System error: ${Cause.pretty(cause)}`,
+                  recoverable: false,
+                });
+              }),
+            ),
+            Effect.ensuring(Queue.end(queue)),
           ),
-        ),
-      );
+        );
 
-      return mailbox;
-    });
+        return queue;
+      });
 
-    return { chat } as const;
-  }),
-}) {}
+      return { chat } as const;
+    }) as Effect.Effect<ChatServiceApi, never, LanguageModel.LanguageModel>,
+  },
+) {}
+
+export const ChatServiceLive = Layer.effect(ChatService)(ChatService.make);

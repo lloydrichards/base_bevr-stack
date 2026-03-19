@@ -4,14 +4,14 @@ import {
   type ClientStatus,
   type WebSocketEvent,
 } from "@repo/domain/WebSocket";
-import { DateTime, Effect, PubSub, Ref } from "effect";
+import { Context, DateTime, Effect, Layer, PubSub, Ref } from "effect";
 
 export type PresenceEventType = typeof WebSocketEvent.Type;
 
-export class PresenceService extends Effect.Service<PresenceService>()(
+export class PresenceService extends Context.Service<PresenceService>()(
   "PresenceService",
   {
-    effect: Effect.gen(function* () {
+    make: Effect.gen(function* () {
       yield* Effect.logInfo("Initializing PresenceService");
 
       const clientsRef = yield* Ref.make(
@@ -21,89 +21,90 @@ export class PresenceService extends Effect.Service<PresenceService>()(
 
       const generateClientId = () => ClientId.make(crypto.randomUUID());
 
-      const addClient = (clientId: typeof ClientId.Type, info: ClientInfo) =>
-        Effect.gen(function* () {
+      const addClient = Effect.fn("PresenceService.addClient")(function* (
+        clientId: typeof ClientId.Type,
+        info: ClientInfo,
+      ) {
+        yield* Ref.update(clientsRef, (clients) => {
+          const newClients = new Map(clients);
+          newClients.set(clientId, info);
+          return newClients;
+        });
+
+        yield* PubSub.publish(pubsub, {
+          _tag: "user_joined",
+          client: info,
+        });
+
+        yield* Effect.logDebug(`Client added: ${clientId}`);
+      });
+
+      const removeClient = Effect.fn("PresenceService.removeClient")(function* (
+        clientId: typeof ClientId.Type,
+      ) {
+        const clients = yield* Ref.get(clientsRef);
+        const client = clients.get(clientId);
+
+        if (client) {
+          const disconnectedAt = yield* DateTime.now;
+
           yield* Ref.update(clientsRef, (clients) => {
             const newClients = new Map(clients);
-            newClients.set(clientId, info);
+            newClients.delete(clientId);
             return newClients;
           });
 
           yield* PubSub.publish(pubsub, {
-            _tag: "user_joined",
-            client: info,
+            _tag: "user_left",
+            clientId,
+            disconnectedAt,
           });
 
-          yield* Effect.logDebug(`Client added: ${clientId}`);
-        });
+          yield* Effect.logDebug(`Client removed: ${clientId}`);
+        }
+      });
 
-      const removeClient = (clientId: typeof ClientId.Type) =>
-        Effect.gen(function* () {
-          const clients = yield* Ref.get(clientsRef);
-          const client = clients.get(clientId);
-
-          if (client) {
-            const disconnectedAt = yield* DateTime.now;
-
-            yield* Ref.update(clientsRef, (clients) => {
-              const newClients = new Map(clients);
-              newClients.delete(clientId);
-              return newClients;
-            });
-
-            yield* PubSub.publish(pubsub, {
-              _tag: "user_left",
-              clientId,
-              disconnectedAt,
-            });
-
-            yield* Effect.logDebug(`Client removed: ${clientId}`);
-          }
-        });
-
-      const setStatus = (
+      const setStatus = Effect.fn("PresenceService.setStatus")(function* (
         clientId: typeof ClientId.Type,
         status: ClientStatus,
-      ) =>
-        Effect.gen(function* () {
-          const clients = yield* Ref.get(clientsRef);
-          const client = clients.get(clientId);
+      ) {
+        const clients = yield* Ref.get(clientsRef);
+        const client = clients.get(clientId);
 
-          if (client) {
-            const changedAt = yield* DateTime.now;
+        if (client) {
+          const changedAt = yield* DateTime.now;
+          const updatedClient: ClientInfo = {
+            ...client,
+            status,
+          };
 
-            const updatedClient: ClientInfo = {
-              ...client,
-              status,
-            };
+          yield* Ref.update(clientsRef, (clients) => {
+            const newClients = new Map(clients);
+            newClients.set(clientId, updatedClient);
+            return newClients;
+          });
 
-            yield* Ref.update(clientsRef, (clients) => {
-              const newClients = new Map(clients);
-              newClients.set(clientId, updatedClient);
-              return newClients;
-            });
+          yield* PubSub.publish(pubsub, {
+            _tag: "status_changed",
+            clientId,
+            status,
+            changedAt,
+          });
 
-            // Broadcast status_changed to all clients
-            yield* PubSub.publish(pubsub, {
-              _tag: "status_changed",
-              clientId,
-              status,
-              changedAt,
-            });
+          yield* Effect.logDebug(
+            `Client ${clientId} status changed to ${status}`,
+          );
+        }
+      });
 
-            yield* Effect.logDebug(
-              `Client ${clientId} status changed to ${status}`,
-            );
-          }
-        });
+      const getClients = Effect.fn("PresenceService.getClients")(function* () {
+        const clients = yield* Ref.get(clientsRef);
+        return Array.from(clients.values());
+      });
 
-      const getClients = () =>
-        Effect.gen(function* () {
-          const clients = yield* Ref.get(clientsRef);
-          return Array.from(clients.values());
-        });
-
-      const subscribe = () => PubSub.subscribe(pubsub);
+      const subscribe = Effect.fn("PresenceService.subscribe")(() =>
+        PubSub.subscribe(pubsub).pipe(Effect.scoped),
+      );
 
       return {
         pubsub,
@@ -113,7 +114,9 @@ export class PresenceService extends Effect.Service<PresenceService>()(
         setStatus,
         getClients,
         subscribe,
-      };
+      } as const;
     }),
   },
-) {}
+) {
+  static layer = Layer.effect(PresenceService)(PresenceService.make);
+}
