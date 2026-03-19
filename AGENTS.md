@@ -20,7 +20,7 @@
 
 ## Tech Stack
 
-Bun 1.2+, TypeScript 5.9, Effect 3.21, React 19, Vite 8, Vitest 4, Tailwind CSS
+Bun 1.2+, TypeScript 5.9, Effect 4-beta, React 19, Vite 8, Vitest 4, Tailwind CSS
 4, Biome 2.4
 
 ## Code Style
@@ -68,7 +68,7 @@ commits in these repos to ensure the LLM references current code:
 If any of the folders are missing (they are git ignored), clone them into
 `reference/`:
 
-- `https://github.com/Effect-TS/effect.git` -> `.reference/effect/`
+- `https://github.com/Effect-TS/effect-smol.git` -> `.reference/effect/`
 - `https://github.com/Effect-TS/effect-atom.git` -> `.reference/effect-atom/`
 
 ---

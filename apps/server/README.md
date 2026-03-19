@@ -19,7 +19,7 @@ From the monorepo root:
 bun dev --filter=server
 
 # Build for production
-bun build --filter=server
+bun run build --filter=server
 ```
 
 The API runs on `http://localhost:9000` in development.
