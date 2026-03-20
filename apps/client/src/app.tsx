@@ -6,8 +6,10 @@ import react from "./assets/react.svg";
 import vite from "./assets/vite.svg";
 import { ChatBox } from "./components/chat-box";
 import { Button } from "./components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { PresencePanel } from "./components/ui/presence-panel";
 import { ResponseCard } from "./components/ui/response-card";
+import { Switch } from "./components/ui/switch";
 import { helloAtom, tickAtom } from "./lib/atom";
 
 function App() {
@@ -44,25 +46,16 @@ function App() {
 
   return (
     <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col items-center justify-center gap-8 p-4">
-      <button
-        aria-checked={isDark}
-        aria-label="Toggle dark mode"
-        className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-foreground shadow-sm transition hover:bg-accent"
-        onClick={handleThemeToggle}
-        role="switch"
-        type="button"
-      >
-        <span className="text-xs font-semibold">
-          {isDark ? "Dark" : "Light"}
-        </span>
-        <span className="relative h-5 w-9 rounded-full bg-muted">
-          <span
-            className={`absolute top-0.5 h-4 w-4 rounded-full bg-primary transition ${
-              isDark ? "left-4" : "left-0.5"
-            }`}
+      <Card className="absolute right-4 top-4" size="sm">
+        <CardContent className="gap-2 flex items-center justify-between">
+          <label htmlFor="theme-toggle">Theme</label>
+          <Switch
+            id="theme-toggle"
+            checked={isDark}
+            onCheckedChange={handleThemeToggle}
           />
-        </span>
-      </button>
+        </CardContent>
+      </Card>
       <div className="flex items-center gap-6">
         <img alt="Bun logo" height={64} src={bun} width={64} />
         <img
@@ -83,21 +76,22 @@ function App() {
       </div>
 
       <div className="grid w-full grid-cols-1 gap-6 auto-rows-[30rem] lg:auto-rows-[22rem] lg:grid-cols-2">
-        <div className="h-full">
-          <ChatBox />
-        </div>
-
-        <div className="h-full">
-          <PresencePanel className="h-full" />
-        </div>
-
+        {/* Chat Box */}
+        <ChatBox />
+        {/* Presence Panel */}
+        <PresencePanel className="h-full" />
+        {/* Rest API */}
         <div className="flex h-full flex-col gap-4">
-          <div className="flex flex-col items-center gap-4 rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-            <h3 className="font-semibold text-foreground text-lg">REST API</h3>
-            <Button className="w-full" onClick={handleApiCall} size="lg">
-              Call REST API
-            </Button>
-          </div>
+          <Card className="h-auto">
+            <CardHeader className="border-b border-border">
+              <CardTitle>REST API</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <Button className="w-full" onClick={handleApiCall} size="lg">
+                Call REST API
+              </Button>
+            </CardContent>
+          </Card>
           {Result.builder(response)
             .onSuccess((data) => (
               <ResponseCard
@@ -136,14 +130,18 @@ function App() {
             ))
             .orNull()}
         </div>
-
+        {/* RPC API */}
         <div className="flex h-full flex-col gap-4">
-          <div className="flex flex-col items-center gap-4 rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm">
-            <h3 className="font-semibold text-foreground text-lg">RPC API</h3>
-            <Button className="w-full" onClick={handleSearch} size="lg">
-              Call RPC API
-            </Button>
-          </div>
+          <Card className="h-auto">
+            <CardHeader className="border-b border-border">
+              <CardTitle>RPC API</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <Button className="w-full" onClick={handleSearch} size="lg">
+                Call RPC API
+              </Button>
+            </CardContent>
+          </Card>
 
           {event ? (
             <ResponseCard

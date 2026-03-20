@@ -72,6 +72,24 @@ src/
 - **Merging**: Always use `cn()` for dynamic classes
 - **Tokens**: Use semantic colors (`bg-primary`, `text-foreground`)
 
+## Design Context
+
+### Users
+Internal developers and demo audiences evaluating or showcasing the stack. Primary jobs: explore the client UX, validate API/RPC/WebSocket flows, and understand how the monorepo pieces fit together.
+
+### Brand Personality
+Technical, precise, modern. Emotional goal: calm and focused; confidence through clarity and low-friction interactions.
+
+### Aesthetic Direction
+Use the existing OKLCH token palette and current component styling. Support both light and dark modes. Avoid visual noise or gimmicks.
+
+### Design Principles
+- Prioritize clarity and legibility over decoration.
+- Keep interactions calm, predictable, and low-friction.
+- Stay consistent with existing tokens, spacing, and component patterns.
+- Maintain strong information hierarchy for scanning.
+- Meet WCAG AAA where feasible.
+
 ## Environment
 
 ```bash

@@ -65,9 +65,9 @@ describe("App", () => {
 
   test("renders REST API section", async () => {
     const screen = await render(<App />);
-    await expect
-      .element(screen.getByRole("heading", { name: "REST API" }))
-      .toBeVisible();
+    const restHeading = screen.getByText(/^REST API$/);
+    restHeading.element().scrollIntoView({ block: "center" });
+    await expect.element(restHeading).toBeVisible();
     await expect
       .element(screen.getByRole("button", { name: "Call REST API" }))
       .toBeVisible();
@@ -75,9 +75,9 @@ describe("App", () => {
 
   test("renders RPC API section", async () => {
     const screen = await render(<App />);
-    await expect
-      .element(screen.getByRole("heading", { name: "RPC API", exact: true }))
-      .toBeVisible();
+    const rpcHeading = screen.getByText(/^RPC API$/);
+    rpcHeading.element().scrollIntoView({ block: "center" });
+    await expect.element(rpcHeading).toBeVisible();
     await expect
       .element(screen.getByRole("button", { name: "Call RPC API" }))
       .toBeVisible();

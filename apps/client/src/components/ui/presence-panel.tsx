@@ -6,11 +6,20 @@ import type {
   WebSocketEvent,
 } from "@repo/domain/WebSocket";
 import { useEffect, useMemo } from "react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
   presenceSubscriptionAtom,
   WebSocketClient,
 } from "../../lib/web-socket-client";
+import { Button } from "./button";
 
 /**
  * Build the current client list by replaying all events from the stream.
@@ -96,13 +105,13 @@ export function PresencePanel({ className }: { className?: string }) {
   const getStatusColor = (status: ClientStatus) => {
     switch (status) {
       case "online":
-        return "bg-green-500";
+        return "bg-primary";
       case "away":
-        return "bg-yellow-500";
+        return "bg-secondary";
       case "busy":
-        return "bg-red-500";
+        return "bg-destructive";
       default:
-        return "bg-gray-500";
+        return "bg-muted-foreground";
     }
   };
 
@@ -111,104 +120,113 @@ export function PresencePanel({ className }: { className?: string }) {
   const hasError = Result.isFailure(eventsResult);
 
   return (
-    <div
-      className={cn(
-        "flex h-full flex-col gap-4 rounded-lg border border-border bg-card p-6 text-card-foreground shadow-sm",
-        className,
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-foreground text-lg">
-          WebSocket Presence (RPC)
-        </h3>
-        <span
-          className={`text-sm font-medium ${
-            isConnected
-              ? "text-green-600"
+    <Card className={cn("h-full", className)}>
+      <CardHeader className="border-b border-border">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <CardTitle>WebSocket Presence (RPC)</CardTitle>
+            <CardDescription>Realtime status updates over RPC.</CardDescription>
+          </div>
+          <Badge
+            variant={isConnected ? "outline" : "secondary"}
+            className={cn(
+              isConnected
+                ? "border-primary/30 bg-primary/10 text-primary"
+                : isConnecting
+                  ? "border-secondary/50 bg-secondary text-secondary-foreground"
+                  : "border-destructive/40 bg-destructive/10 text-destructive",
+            )}
+          >
+            {isConnected && myClientId
+              ? `connected`
               : isConnecting
-                ? "text-yellow-600"
-                : "text-destructive"
-          }`}
-        >
-          {isConnected && myClientId
-            ? `connected (${myClientId.slice(0, 8)}...)`
-            : isConnecting
-              ? "connecting..."
-              : "disconnected"}
-        </span>
-      </div>
+                ? "connecting"
+                : "disconnected"}
+          </Badge>
+        </div>
+      </CardHeader>
 
       {/* Error Display */}
-      {hasError &&
-        Result.match(eventsResult, {
-          onInitial: () => null,
-          onSuccess: () => null,
-          onFailure: (error) => (
-            <div className="rounded bg-destructive/10 p-2 text-destructive text-sm">
-              Error: {String(error)}
-            </div>
-          ),
-        })}
+      <CardContent className="flex flex-col gap-4">
+        {hasError &&
+          Result.match(eventsResult, {
+            onInitial: () => null,
+            onSuccess: () => null,
+            onFailure: (error) => (
+              <div className="rounded-none border border-destructive/40 bg-destructive/10 p-3 text-destructive text-xs">
+                Error: {String(error)}
+              </div>
+            ),
+          })}
 
-      {/* Status Buttons */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => handleSetStatus("online")}
-          className="flex-1 rounded bg-green-500 px-3 py-2 text-sm text-white hover:bg-green-600 disabled:opacity-50"
-          disabled={!isConnected || !myClientId}
-        >
-          Online
-        </button>
-        <button
-          type="button"
-          onClick={() => handleSetStatus("away")}
-          className="flex-1 rounded bg-yellow-500 px-3 py-2 text-sm text-white hover:bg-yellow-600 disabled:opacity-50"
-          disabled={!isConnected || !myClientId}
-        >
-          Away
-        </button>
-        <button
-          type="button"
-          onClick={() => handleSetStatus("busy")}
-          className="flex-1 rounded bg-red-500 px-3 py-2 text-sm text-white hover:bg-red-600 disabled:opacity-50"
-          disabled={!isConnected || !myClientId}
-        >
-          Busy
-        </button>
-      </div>
+        <div className="flex gap-2">
+          <Button
+            variant="default"
+            size="lg"
+            onClick={() => handleSetStatus("online")}
+            className="flex-1"
+            disabled={!isConnected || !myClientId}
+          >
+            Online
+          </Button>
+          <Button
+            variant="secondary"
+            size="lg"
+            onClick={() => handleSetStatus("away")}
+            className="flex-1"
+            disabled={!isConnected || !myClientId}
+          >
+            Away
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => handleSetStatus("busy")}
+            className="flex-1"
+            disabled={!isConnected || !myClientId}
+          >
+            Busy
+          </Button>
+        </div>
 
-      {/* Connected Clients */}
-      <div className="rounded border border-border bg-muted/50 p-3">
-        <h4 className="mb-2 font-medium text-foreground text-sm">
-          Connected Clients ({clients.length})
-        </h4>
-        {clients.length === 0 ? (
-          <p className="text-muted-foreground text-sm">No clients connected</p>
-        ) : (
-          <ul className="space-y-1">
-            {clients.map((client: ClientInfo) => (
-              <li
-                key={client.clientId}
-                className="flex items-center gap-2 text-sm"
-              >
-                <span
-                  className={`h-2 w-2 rounded-full ${getStatusColor(
-                    client.status,
-                  )}`}
-                />
-                <span className="font-mono text-muted-foreground">
-                  {client.clientId.slice(0, 8)}...
-                </span>
-                <span className="text-muted-foreground">({client.status})</span>
-                {client.clientId === myClientId && (
-                  <span className="text-primary text-xs">(you)</span>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-    </div>
+        <div className="rounded-none border border-border bg-muted/50 p-3">
+          <h4 className="mb-2 font-medium text-foreground text-xs uppercase tracking-[0.2em]">
+            Connected Clients ({clients.length})
+          </h4>
+          {clients.length === 0 ? (
+            <p className="text-muted-foreground text-xs">
+              No clients connected
+            </p>
+          ) : (
+            <ul className="space-y-1">
+              {clients.map((client: ClientInfo) => (
+                <li
+                  key={client.clientId}
+                  className="flex items-center gap-2 text-xs"
+                >
+                  <span
+                    className={cn(
+                      "h-2 w-2 rounded-full",
+                      getStatusColor(client.status),
+                    )}
+                  />
+                  <span className="font-mono text-muted-foreground">
+                    {client.clientId.slice(0, 8)}...
+                  </span>
+                  <span className="text-muted-foreground">
+                    ({client.status})
+                  </span>
+                  {client.clientId === myClientId && (
+                    <span className="text-primary text-[0.6rem] uppercase tracking-[0.2em]">
+                      you
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

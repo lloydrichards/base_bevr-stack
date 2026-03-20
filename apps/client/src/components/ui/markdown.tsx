@@ -21,7 +21,7 @@ export const Markdown = memo(function Markdown({ content }: MarkdownProps) {
             </code>
           ) : (
             <code
-              className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono"
+              className="bg-muted px-1.5 py-0.5 rounded-none text-xs font-mono"
               {...props}
             >
               {children}
@@ -43,7 +43,7 @@ export const Markdown = memo(function Markdown({ content }: MarkdownProps) {
         blockquote({ children, ...props }) {
           return (
             <blockquote
-              className="border-l-4 border-muted-foreground/20 pl-4 italic"
+              className="border-l-4 border-muted-foreground/20 pl-4 italic text-muted-foreground"
               {...props}
             >
               {children}
@@ -104,7 +104,7 @@ export const Markdown = memo(function Markdown({ content }: MarkdownProps) {
         pre({ children, ...props }) {
           return (
             <pre
-              className="bg-muted p-4 rounded-lg overflow-x-auto my-4 border border-border"
+              className="bg-muted p-4 rounded-none overflow-x-auto my-4 border border-border"
               {...props}
             >
               {children}
