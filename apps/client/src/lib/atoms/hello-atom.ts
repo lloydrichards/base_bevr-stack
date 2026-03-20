@@ -1,5 +1,5 @@
 import { FetchHttpClient, HttpApiClient } from "@effect/platform";
-import { Api } from "@repo/domain";
+import { Api } from "@repo/domain/Api";
 import { Effect } from "effect";
 import { runtime } from "../atom";
 
