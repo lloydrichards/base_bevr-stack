@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils";
 import {
   presenceSubscriptionAtom,
   WebSocketClient,
-} from "../../lib/web-socket-client";
-import { Button } from "./button";
+} from "../lib/web-socket-client";
+import { Button } from "./ui/button";
 
 /**
  * Build the current client list by replaying all events from the stream.
