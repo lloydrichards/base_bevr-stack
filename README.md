@@ -15,8 +15,8 @@ but the addition of Effect and Turborepo. Includes a Model Context Protocol
   server for AI assistant tools and resources
 - **Modern Tooling**: [Turborepo](https://turbo.build/), [Bun](https://bun.sh/),
   [Vite](https://vitejs.dev/), and [React](https://react.dev/)
-- **Zero Config**: Pre-configured [Ultracite](https://www.ultracite.ai/) for
-  linting and formatting with [Biome](https://biomejs.dev)
+- **Zero Config**: Pre-configured linting and formatting with
+  [Biome](https://biomejs.dev)
 - **Flexible Deployment**: Deploy anywhere without vendor lock-in
 
 ## Quick Start
@@ -29,7 +29,7 @@ bun install
 bun dev
 
 # Build for production
-bun build
+bun run build
 ```
 
 ### Formatting and Linting
@@ -91,9 +91,13 @@ should be committed to git. Update them when UI changes are intentional.
 │   ├── client/             # React frontend (Vite + React)
 │   ├── server/             # Bun + Effect backend API
 │   └── server-mcp/         # Model Context Protocol server
+├── e2e/                     # Playwright end-to-end tests
 ├── packages/
+│   ├── ai/                 # AI services and toolkits
 │   ├── config-typescript/  # TypeScript configurations
-│   └── domain/             # Shared Schema definitions
+│   ├── domain/             # Shared Schema definitions
+│   ├── observability/      # OpenTelemetry setup
+│   └── presence/           # Presence tracking service
 ├── docker-compose.yaml     # Docker Compose configuration for deployment
 ├── package.json            # Root package.json with workspaces
 └── turbo.json              # Turborepo configuration
@@ -113,6 +117,9 @@ should be committed to git. Update them when UI changes are intentional.
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `@repo/config-typescript` | TypeScript configurations used throughout the monorepo                                                             |
 | `@repo/domain`            | Shared Schema definitions using [Effect Schema](https://effect.website/docs/schema) used by both client and server |
+| `@repo/ai`                | AI tooling and service layers built on [@effect/ai](https://github.com/tim-smart/effect-io-ai)                     |
+| `@repo/observability`     | Shared OpenTelemetry setup                                                                                         |
+| `@repo/presence`          | Presence tracking service for WebSocket clients                                                                    |
 
 ## Development
 
@@ -124,11 +131,12 @@ bun dev --filter=client
 bun dev --filter=server
 bun dev --filter=server-mcp
 
+
 # Build all apps
 bun run build
 
 # Test MCP server functionality (MCPJam Inspector)
-bun inspector --filter=server-mcp
+bun --filter=server-mcp run inspector
 ```
 
 ## Deployment
@@ -154,7 +162,7 @@ You can configure the deployment using environment variables:
 ```bash
 # Example .env file
 CLIENT_PORT=3000
-SERVER_PORT=8000
+SERVER_PORT=9000
 MCP_PORT=9009
 ```
 
@@ -163,7 +171,7 @@ MCP_PORT=9009
 Import shared types from the domain package:
 
 ```typescript
-import { ApiResponse } from "@repo/domain";
+import { ApiResponse } from "@repo/domain/Api";
 ```
 
 ## Learn More

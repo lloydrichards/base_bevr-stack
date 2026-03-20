@@ -50,7 +50,7 @@ const Api = HttpApi.make("Api").add(HelloGroup);
 const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
   handlers.handle("get", () => {
     const data: typeof ApiResponse.Type = {
-      message: "Hello bhEvr!",
+        message: "Hello bEvr!",
       success: true,
     };
     return Effect.succeed(data);
@@ -88,7 +88,7 @@ describe("MyService", () => {
 });
 ```
 
-Use `effect.it()` for tests that return Effect values. The test runner
+Use `it.effect()` for tests that return Effect values. The test runner
 automatically handles Effect execution and error propagation.
 
 ## Learn More

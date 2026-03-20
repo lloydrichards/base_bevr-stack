@@ -12,6 +12,7 @@ the [bEvr stack](../../README.md).
 - **Bun** - JavaScript runtime
 - **TypeScript** - Type safety
 - **@repo/domain** - Shared types and schemas
+- **@repo/observability** - Shared OpenTelemetry layer
 
 ## Getting Started
 
@@ -25,7 +26,7 @@ bun dev --filter=server-mcp
 bun build --filter=server-mcp
 
 # Test MCP server functionality (MCPJam Inspector)
-bun inspector
+bun --filter=server-mcp run inspector
 ```
 
 The MCP server provides tools and resources for AI assistants via the Model
@@ -48,7 +49,7 @@ handling:
 You can test the MCP server functionality using MCPJam Inspector:
 
 ```bash
-bun inspector
+bun --filter=server-mcp run inspector
 ```
 
 This will start an interactive session where you can test MCP tools and

@@ -20,8 +20,8 @@
 
 ## Tech Stack
 
-Bun 1.2+, TypeScript 5.9, Effect 3.19, React 19, Vite 7, Vitest 4, Tailwind CSS
-4, Biome 2.3
+Bun 1.2+, TypeScript 5.9, Effect 3.21, React 19, Vite 8, Vitest 4, Tailwind CSS
+4, Biome 2.4
 
 ## Code Style
 

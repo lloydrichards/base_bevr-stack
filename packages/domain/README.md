@@ -22,23 +22,23 @@ Import types and schemas in your apps:
 
 ```typescript
 // In client or server
-import { ApiResponse, UserSchema } from "@repo/domain";
+import { ApiResponse } from "@repo/domain/Api";
 
 // Use types for API communication
 const response: ApiResponse = await fetchData();
 
 // Use schemas for validation
-const validUser = UserSchema.decode(userData);
+const valid = Schema.decodeUnknownSync(ApiResponse)(value);
 ```
 
 ## Structure
 
 ```txt
 src/
-├── index.ts          # Main exports
-├── schemas/          # Effect Schema definitions
-├── types/            # TypeScript type definitions
-└── utils/            # Shared utility functions
+├── Api.ts       # HttpApi definitions (REST endpoints)
+├── Chat.ts      # Chat schemas and events
+├── Rpc.ts       # RPC definitions (HTTP streaming)
+└── WebSocket.ts # WebSocket RPC definitions (real-time)
 ```
 
 ## Learn More
