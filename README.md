@@ -5,6 +5,8 @@ Effect, Vite, and React. Heavily inspired by the [bhvr](https://bhvr.dev/) stack
 but the addition of Effect and Turborepo. Includes a Model Context Protocol
 (MCP) server for AI assistant integrations.
 
+![screenshot of client app](./e2e/smoke.spec.ts-snapshots/app-layout-chromium-darwin.png)
+
 ## Features
 
 - **End-to-end TypeScript**: Full type safety from client to server
