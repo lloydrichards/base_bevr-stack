@@ -13,12 +13,12 @@
     "clean": "git clean -xdf .cache .turbo dist node_modules tsconfig.tsbuildinfo"
   },
   "dependencies": {
-    "@effect/platform": "^0.95.0",
-    "@effect/opentelemetry": "^0.62.0",
-    "@effect/rpc": "^0.74.0",
+    "@effect/platform": "^0.96.0",
+    "@effect/opentelemetry": "^0.63.0",
+    "@effect/rpc": "^0.75.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.213.0",
     "@opentelemetry/sdk-trace-base": "^2.6.0",
-    "effect": "^3.20.0"
+    "effect": "^3.21.0"
   },
   "devDependencies": {
     "@repo/config-typescript": "workspace:*"
