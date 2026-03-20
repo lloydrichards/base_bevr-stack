@@ -18,6 +18,7 @@
     "@effect/platform-bun": "^0.89.0",
     "@effect/rpc": "^0.75.0",
     "@repo/ai": "workspace:*",
+    "@repo/presence": "workspace:*",
     "@repo/domain": "workspace:*",
     "@repo/observability": "workspace:*",
     "effect": "3.21.0"

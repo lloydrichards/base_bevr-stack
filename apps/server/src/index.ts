@@ -1,164 +1,18 @@
-import { Prompt } from "@effect/ai";
 import { DevTools } from "@effect/experimental";
-import { HttpApiBuilder, HttpLayerRouter, HttpServer } from "@effect/platform";
+import { HttpLayerRouter, HttpServer } from "@effect/platform";
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { RpcSerialization, RpcServer } from "@effect/rpc";
 import { ChatService, FastModelLive, SampleToolkitLive } from "@repo/ai";
-import { Api, type ApiResponse } from "@repo/domain/Api";
-import { EventRpc, type TickEvent } from "@repo/domain/Rpc";
-import {
-  type ClientInfo,
-  type WebSocketEvent,
-  WebSocketRpc,
-} from "@repo/domain/WebSocket";
+import { Api } from "@repo/domain/Api";
+import { EventRpc } from "@repo/domain/Rpc";
+import { WebSocketRpc } from "@repo/domain/WebSocket";
 import { ObservabilityLive } from "@repo/observability";
-import { Config, Effect, Layer, Mailbox, Queue, Stream } from "effect";
-import { PresenceService } from "./services/PresenceService";
-
-const HealthGroupLive = HttpApiBuilder.group(Api, "health", (handlers) =>
-  handlers.handle("get", () => Effect.succeed("Hello Effect!")),
-);
-
-const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
-  handlers.handle("get", () => {
-    const data: typeof ApiResponse.Type = {
-      message: "Hello bEvr!",
-      success: true,
-    };
-    return Effect.succeed(data);
-  }),
-);
-
-const EventRpcLive = EventRpc.toLayer(
-  Effect.gen(function* () {
-    const bot = yield* ChatService;
-    yield* Effect.log("Starting Event RPC Live Implementation");
-    return {
-      tick: Effect.fn(function* (payload) {
-        yield* Effect.log("Creating new tick stream");
-        const mailbox = yield* Mailbox.make<typeof TickEvent.Type>();
-        yield* Effect.forkScoped(
-          Effect.gen(function* () {
-            yield* mailbox.offer({ _tag: "starting" });
-            yield* Effect.sleep("3 seconds");
-            for (let i = 0; i < payload.ticks; i++) {
-              yield* Effect.sleep("1 second");
-              yield* mailbox.offer({ _tag: "tick" });
-            }
-            yield* mailbox.offer({ _tag: "end" });
-            yield* Effect.log("End event sent");
-          }).pipe(Effect.ensuring(mailbox.end)),
-        );
-        return mailbox;
-      }),
-      chat: ({ messages }) =>
-        bot.chat(
-          messages.map((msg) => {
-            if (msg.role === "system") {
-              return Prompt.makeMessage(msg.role, {
-                content: msg.content,
-              });
-            }
-            return Prompt.makeMessage(msg.role, {
-              content: [Prompt.makePart("text", { text: msg.content })],
-            });
-          }),
-        ),
-    };
-  }),
-);
-
-const PresenceRpcLive = WebSocketRpc.toLayer(
-  Effect.gen(function* () {
-    const presence = yield* PresenceService;
-    yield* Effect.log("Starting Presence RPC Live Implementation");
-
-    return {
-      subscribe: Effect.fn(function* () {
-        yield* Effect.log("New presence subscription");
-
-        const clientId = presence.generateClientId();
-        const connectedAt = Date.now();
-        const clientInfo: ClientInfo = {
-          clientId,
-          status: "online",
-          connectedAt,
-        };
-
-        const mailbox = yield* Mailbox.make<WebSocketEvent>();
-
-        // CRITICAL: Subscribe to PubSub FIRST to ensure we don't miss any events
-        const subscription = yield* presence.subscribe();
-
-        // Fork the stream consumer to handle incoming PubSub events
-        yield* Effect.forkScoped(
-          Stream.fromQueue(subscription).pipe(
-            Stream.tap((event) =>
-              Effect.gen(function* () {
-                // Filter out our own user_joined event since we send "connected" instead
-                if (
-                  event._tag === "user_joined" &&
-                  event.client.clientId === clientId
-                ) {
-                  return;
-                }
-                yield* mailbox.offer(event);
-              }),
-            ),
-            Stream.runDrain,
-            Effect.ensuring(
-              Effect.gen(function* () {
-                yield* Queue.shutdown(subscription);
-                yield* presence.removeClient(clientId);
-                yield* mailbox.end;
-                yield* Effect.log(
-                  `Presence subscription ended for ${clientId}`,
-                );
-              }),
-            ),
-          ),
-        );
-
-        // Get existing clients BEFORE adding ourselves
-        const existingClients = yield* presence.getClients();
-
-        // Now add ourselves - this publishes user_joined to PubSub for other clients
-        yield* presence.addClient(clientId, clientInfo);
-
-        // Send our own connected event (not user_joined since we're the one connecting)
-        yield* mailbox.offer({
-          _tag: "connected",
-          clientId,
-          connectedAt,
-        });
-
-        // Send existing clients as user_joined events so we know who's already here
-        for (const client of existingClients) {
-          yield* mailbox.offer({
-            _tag: "user_joined",
-            client,
-          });
-        }
-
-        return mailbox;
-      }),
-
-      setStatus: Effect.fn(function* (payload) {
-        yield* Effect.log(
-          `Setting status for ${payload.clientId} to ${payload.status}`,
-        );
-        yield* presence.setStatus(payload.clientId, payload.status);
-        return { success: true };
-      }),
-
-      getPresence: Effect.fn(function* () {
-        const clients = yield* presence.getClients();
-        yield* Effect.log(`Returning ${clients.length} clients`);
-        return { clients: [...clients] };
-      }),
-    };
-  }),
-);
+import { PresenceService } from "@repo/presence";
+import { Config, Effect, Layer } from "effect";
+import { HealthGroupLive } from "./Api/Health";
+import { HelloGroupLive } from "./Api/Hello";
+import { EventRpcLive } from "./Rpc/Event";
+import { PresenceRpcLive } from "./Rpc/Presence";
 
 // ============================================================================
 // Server Configuration
