@@ -5,7 +5,7 @@ React frontend built with Vite and TypeScript, part of the
 
 ## Stack
 
-- **React 18** - UI framework
+- **React 19** - UI framework
 - **Vite** - Build tool and dev server
 - **TypeScript** - Type safety
 - **Effect** - Functional programming utilities
@@ -20,7 +20,7 @@ From the monorepo root:
 bun dev --filter=client
 
 # Build for production
-bun build --filter=client
+bun run build --filter=client
 ```
 
 The app runs on `http://localhost:3000` in development.

@@ -1,38 +1,54 @@
-# @repo/observability
+# @repo/ai
 
-Shared OpenTelemetry setup for the [bEvr stack](../../README.md) using Effect.
+Shared AI tooling for the [bEvr stack](../../README.md), built with Effect and
+@effect/ai.
 
 ## Overview
 
-This package centralizes OTEL configuration so apps can enable tracing by
-providing environment variables instead of wiring exporters per app.
+This package provides reusable language model layers, a chat service that
+streams events, and sample toolkits for agentic workflows.
 
 ## Environment
 
-- `OTEL_EXPORTER_OTLP_ENDPOINT`
-- `OTEL_SERVICE_NAME`
-
-When both are set, tracing is enabled and spans are exported via OTLP over HTTP.
-If either is missing, tracing is disabled with a log message.
+- `ANTHROPIC_API_KEY`
 
 ## Usage
 
-Provide the layer at app startup:
+```typescript
+import { ChatService, FastModelLive, SampleToolkitLive } from "@repo/ai";
+import { Layer } from "effect";
 
-```ts
-import { ObservabilityLive } from "@repo/observability";
+const AiLive = Layer.mergeAll(FastModelLive, SampleToolkitLive);
 
-const HttpLive = HttpLayerRouter.serve(Router).pipe(
-  Layer.provideMerge(ObservabilityLive),
-);
+const AppLive = ChatService.Default.pipe(Layer.provideMerge(AiLive));
 ```
 
-## API
+## Removing From Apps
 
-- `ObservabilityLive`: Layer that configures NodeSdk when env vars are set.
-- `Observability`: re-export of `NodeSdk` for advanced configuration.
+### Server
+
+1. Remove AI wiring from the server runtime:
+   - `apps/server/src/index.ts`: drop `ChatService`, `FastModelLive`,
+     `SampleToolkitLive` imports and `Layer.provide(...)` calls.
+2. Remove the chat RPC handler:
+   - `apps/server/src/Rpc/Event.ts`: remove the `chat` handler (and the
+     `@effect/ai` `Prompt` import if unused).
+3. Remove AI dependencies:
+   - `apps/server/package.json`: remove `@repo/ai` (and any unused `@effect/ai`
+     entries if no longer needed).
+
+### Client
+
+1. Remove the chat UI and atom:
+   - `apps/client/src/app.tsx`: remove `<ChatBox />` and its import.
+   - `apps/client/src/components/chat-box.tsx`: delete the file or exclude it.
+   - `apps/client/src/lib/atoms/chat-atom.ts`: delete the atom.
+2. Remove chat-related types usage:
+   - `apps/client/src/components/ui/segment.tsx`: remove if only used by chat.
+3. Remove chat references in tests:
+   - `apps/client/src/app.test.tsx`: delete any chat-specific mocks if unused.
 
 ## Learn More
 
-- [Effect OpenTelemetry](https://effect.website/docs/guides/opentelemetry)
+- [@effect/ai Documentation](https://github.com/tim-smart/effect-io-ai)
 - [bEvr Stack Overview](../../README.md)

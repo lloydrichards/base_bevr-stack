@@ -32,6 +32,24 @@ const HttpLive = HttpLayerRouter.serve(Router).pipe(
 - `ObservabilityLive`: Layer that configures NodeSdk when env vars are set.
 - `Observability`: re-export of `NodeSdk` for advanced configuration.
 
+## Removing From Apps
+
+### Server
+
+1. Remove Observability wiring from server startup:
+   - `apps/server/src/index.ts`: remove the `ObservabilityLive` import and the
+     `Layer.provideMerge(ObservabilityLive)` call.
+2. Remove the dependency:
+   - `apps/server/package.json`: remove `@repo/observability`.
+
+### MCP Server
+
+1. Remove Observability wiring:
+   - `apps/server-mcp/src/index.ts`: remove the `ObservabilityLive` import and
+     the `Layer.provideMerge(ObservabilityLive)` call.
+2. Remove the dependency:
+   - `apps/server-mcp/package.json`: remove `@repo/observability`.
+
 ## Learn More
 
 - [Effect OpenTelemetry](https://effect.website/docs/guides/opentelemetry)
