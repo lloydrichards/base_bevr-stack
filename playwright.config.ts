@@ -26,13 +26,13 @@ export default defineConfig({
   // Self-contained: start servers automatically
   webServer: [
     {
-      command: "bun run --filter=server dev",
+      command: "bun run dev --filter=server",
       url: "http://localhost:9000",
       reuseExistingServer: !isCI,
       timeout: 120 * 1000,
     },
     {
-      command: "bun run --filter=client dev",
+      command: "bun run dev --filter=client",
       url: "http://localhost:3000",
       reuseExistingServer: !isCI,
       timeout: 120 * 1000,
