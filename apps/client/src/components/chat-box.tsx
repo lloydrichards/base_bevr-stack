@@ -4,7 +4,17 @@ import { AlertCircle, Loader2, Send } from "lucide-react";
 import { type FC, useEffect, useMemo, useRef, useState } from "react";
 import { chatAtom } from "@/lib/atoms/chat-atom";
 import { cn } from "@/lib/utils";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "./ui/card";
+import { Input } from "./ui/input";
 import { Markdown } from "./ui/markdown";
 import { Segment, TokenUsage, ToolCall } from "./ui/segment";
 
@@ -145,51 +155,59 @@ export function ChatBox() {
   }, [scrollTrigger]);
 
   return (
-    <div className="flex h-full w-full flex-col rounded-lg border border-border shadow-sm bg-card text-card-foreground">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-6 py-4">
-        <h3 className="font-semibold text-foreground text-lg">Chat (RPC)</h3>
+    <Card className="h-full w-full">
+      <CardHeader className="border-b border-border">
+        <CardTitle>Chat (RPC)</CardTitle>
+        <CardAction>
+          <div className="flex gap-2">
+            {isStreaming && (
+              <Badge
+                variant="outline"
+                className="border-border bg-secondary text-[0.65rem] uppercase tracking-[0.2em] text-secondary-foreground"
+              >
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Streaming
+              </Badge>
+            )}
+            {isWaiting && !isStreaming && (
+              <Badge
+                variant="outline"
+                className="border-border bg-muted text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground"
+              >
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Loading
+              </Badge>
+            )}
+            {isFailure && (
+              <Badge
+                variant="destructive"
+                className="text-[0.65rem] uppercase tracking-[0.2em]"
+              >
+                <AlertCircle className="h-3 w-3" />
+                Error
+              </Badge>
+            )}
+            {currentIteration !== null && (
+              <Badge
+                variant="outline"
+                className="border-border bg-secondary text-[0.65rem] uppercase tracking-[0.2em] text-secondary-foreground"
+              >
+                Iteration {currentIteration}
+              </Badge>
+            )}
+          </div>
+        </CardAction>
+      </CardHeader>
 
-        <div className="flex gap-2">
-          {isStreaming && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-secondary-foreground">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              Streaming
-            </span>
-          )}
-          {isWaiting && !isStreaming && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              Loading
-            </span>
-          )}
-          {isFailure && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-destructive">
-              <AlertCircle className="h-3 w-3" />
-              Error
-            </span>
-          )}
-          {currentIteration !== null && (
-            <span className="inline-flex items-center gap-1 rounded-full border border-border bg-secondary px-2.5 py-0.5 text-[0.65rem] font-medium uppercase tracking-[0.2em] text-secondary-foreground">
-              Iteration {currentIteration}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Messages */}
-      <div
-        className="flex-1 min-h-0 overflow-y-auto px-6"
-        ref={scrollContainerRef}
-      >
-        <div className="space-y-6 py-6">
+      <CardContent className="flex-1 min-h-0 overflow-y-auto px-4">
+        <div className="space-y-6 py-6" ref={scrollContainerRef}>
           {/* Empty state */}
           {displayHistory.length === 0 && currentSegments.length === 0 && (
-            <div className="flex flex-col items-start gap-2 rounded-md border border-border bg-muted/50 px-4 py-6 text-sm text-muted-foreground">
-              <p className="text-xs uppercase tracking-[0.28em]">
+            <div className="flex flex-col items-start gap-2 rounded-none border border-border bg-muted/50 px-4 py-6 text-xs text-muted-foreground">
+              <p className="text-[0.65rem] uppercase tracking-[0.28em]">
                 Empty channel
               </p>
-              <p className="text-sm text-foreground">
+              <p className="text-xs text-foreground">
                 Start with a clear request.
               </p>
             </div>
@@ -206,7 +224,7 @@ export function ChatBox() {
               )}
             >
               {msg.role === "user" ? (
-                <div className="max-w-[85%] rounded-md border border-primary/40 bg-primary px-4 py-2 text-sm text-primary-foreground shadow-xs whitespace-break-spaces">
+                <div className="max-w-[85%] rounded-none border border-primary/40 bg-primary px-4 py-2 text-xs text-primary-foreground shadow-xs whitespace-break-spaces">
                   {msg.message}
                 </div>
               ) : (
@@ -217,7 +235,7 @@ export function ChatBox() {
                       key={segIdx}
                     >
                       {segment._tag === "text" ? (
-                        <div className="w-full py-2 text-sm">
+                        <div className="w-full py-2 text-xs">
                           <Markdown content={segment.content} />
                         </div>
                       ) : (
@@ -249,11 +267,13 @@ export function ChatBox() {
 
           {/* Error display from stream */}
           {currentResult._tag === "error" && (
-            <div className="text-destructive text-sm p-3 border border-destructive/40 bg-destructive/10 rounded-md">
+            <div className="text-destructive text-xs p-3 border border-destructive/40 bg-destructive/10 rounded-none">
               <div className="flex items-start gap-2">
                 <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                 <div className="flex-1">
-                  <p className="font-medium">{currentResult.error.message}</p>
+                  <p className="font-medium text-foreground">
+                    {currentResult.error.message}
+                  </p>
                   {currentResult.error.recoverable && (
                     <Button
                       size="sm"
@@ -277,14 +297,12 @@ export function ChatBox() {
 
           {/* Scroll anchor */}
         </div>
-      </div>
+      </CardContent>
 
-      {/* Input */}
-      <div className="border-t border-border px-6 py-4">
+      <CardFooter className="border-t border-border">
         <div className="flex w-full gap-2">
-          <input
+          <Input
             type="text"
-            className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
             placeholder="Send a message"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -299,8 +317,8 @@ export function ChatBox() {
             <Send className="h-4 w-4" />
           </Button>
         </div>
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
 
@@ -327,7 +345,7 @@ const ErrorDisplay: FC<{
 }> = ({ result }) => {
   return (
     <div className="flex w-full justify-center">
-      <div className="text-destructive text-sm flex flex-col items-center gap-2 max-w-[80%]">
+      <div className="text-destructive text-xs flex flex-col items-center gap-2 max-w-[80%]">
         <div className="flex items-center gap-2">
           <AlertCircle className="h-4 w-4" />
           Failed to get response
@@ -339,7 +357,7 @@ const ErrorDisplay: FC<{
           <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
             Show technical details
           </summary>
-          <div className="mt-2 p-2 bg-muted rounded text-left overflow-auto max-h-40">
+          <div className="mt-2 p-2 bg-muted rounded-none text-left overflow-auto max-h-40">
             <pre className="whitespace-pre-wrap break-words">
               {JSON.stringify(result.cause, null, 2)}
             </pre>

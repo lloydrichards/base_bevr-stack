@@ -8,20 +8,52 @@ export function ToolCall({
 }: {
   segment: MessageSegment & { _tag: "tool-call" };
 }) {
+  const statusStyles = {
+    executing: {
+      icon: "text-muted-foreground",
+      badge: "border-border bg-muted text-muted-foreground",
+      label: "Executing",
+    },
+    complete: {
+      icon: "text-primary",
+      badge: "border-primary/30 bg-primary/10 text-primary",
+      label: "Complete",
+    },
+    failed: {
+      icon: "text-destructive",
+      badge: "border-destructive/40 bg-destructive/10 text-destructive",
+      label: "Failed",
+    },
+    proposed: {
+      icon: "text-secondary-foreground",
+      badge: "border-border bg-secondary text-secondary-foreground",
+      label: "Proposed",
+    },
+  } as const;
+  const styles = statusStyles[segment.tool.status];
+
   return (
-    <div className="max-w-full flex items-center gap-2 text-xs px-3 py-2 rounded-md bg-muted/50 border flex-wrap">
+    <div className="max-w-full flex items-center gap-2 text-xs px-3 py-2 rounded-none bg-muted/50 border border-border flex-wrap">
       {segment.tool.status === "executing" && (
-        <Loader2 className="h-3 w-3 animate-spin" />
+        <Loader2 className={`h-3 w-3 animate-spin ${styles.icon}`} />
       )}
       {segment.tool.status === "complete" && (
-        <CheckCircle className="h-3 w-3 text-green-600" />
+        <CheckCircle className={`h-3 w-3 ${styles.icon}`} />
       )}
       {segment.tool.status === "failed" && (
-        <AlertCircle className="h-3 w-3 text-red-600" />
+        <AlertCircle className={`h-3 w-3 ${styles.icon}`} />
       )}
       {segment.tool.status === "proposed" && (
-        <Wrench className="h-3 w-3 text-amber-600" />
+        <Wrench className={`h-3 w-3 ${styles.icon}`} />
       )}
+      <span
+        className={cn(
+          "text-[0.6rem] uppercase tracking-[0.2em] border rounded-none px-1.5 py-0.5",
+          styles.badge,
+        )}
+      >
+        {styles.label}
+      </span>
       <span className="font-mono font-medium">{segment.tool.name}</span>
       {segment.tool.result && segment.tool.status === "complete" && (
         <span className="text-muted-foreground flex-1 truncate overflow-hidden break-all">
