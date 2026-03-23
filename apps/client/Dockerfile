@@ -16,6 +16,7 @@ WORKDIR /app
 ARG SERVER_URL
 ARG SERVER_HOST=localhost
 ARG SERVER_PORT=9000
+ARG CLIENT_PORT=3000
 ENV VITE_SERVER_URL=${SERVER_URL:-http://${SERVER_HOST}:${SERVER_PORT}}
 
 
@@ -33,9 +34,10 @@ WORKDIR /app
 RUN apk update && apk add --no-cache tini
 
 COPY --from=pruner /app/support/nginx-spa.conf /etc/nginx/conf.d/default.conf
+RUN sed -i "s/\${CLIENT_PORT}/${CLIENT_PORT}/g" /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/apps/client/dist ./
 
-EXPOSE 80 443
+EXPOSE ${CLIENT_PORT}
 
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["nginx", "-g", "daemon off;"]
