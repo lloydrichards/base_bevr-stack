@@ -1,3 +1,4 @@
+import { Github } from "lucide-react";
 import bun from "./assets/bun.svg";
 import effect from "./assets/effect.svg";
 import react from "./assets/react.svg";
@@ -7,6 +8,7 @@ import { PresencePanel } from "./components/presence-panel";
 import { RestCard } from "./components/rest-card";
 import { RpcCard } from "./components/rpc-card";
 import { ThemeToggle } from "./components/theme-toggle";
+import { Button } from "./components/ui/button";
 
 function App() {
   return (
@@ -37,6 +39,35 @@ function App() {
         <RestCard />
         <RpcCard />
       </div>
+      <footer className="w-full flex justify-between">
+        <Button
+          variant="link"
+          render={(props) => (
+            <a
+              {...props}
+              href="https://www.lloydrichards.dev"
+              target="_blank"
+              rel="noopener"
+            >
+              lloydrichards.dev
+            </a>
+          )}
+        />
+        <Button
+          variant="link"
+          render={(props) => (
+            <a
+              {...props}
+              href="https://github.com/lloydrichards/base_bevr-stack"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Github />
+              Github
+            </a>
+          )}
+        />
+      </footer>
     </div>
   );
 }
