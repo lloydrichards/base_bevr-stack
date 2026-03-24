@@ -3,10 +3,10 @@
   "extends": "@repo/config-typescript/vite.json",
   "compilerOptions": {
     "outDir": "dist",
-    "baseUrl": ".",
+
     "paths": {
-      "@/*": ["src/*"],
-      "~/*": ["public/*"]
+      "@/*": ["./src/*"],
+      "~/*": ["./public/*"]
     },
     "plugins": [
       {
