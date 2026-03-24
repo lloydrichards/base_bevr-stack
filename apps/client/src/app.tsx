@@ -1,9 +1,9 @@
-import { Github } from "lucide-react";
 import bun from "./assets/bun.svg";
 import effect from "./assets/effect.svg";
 import react from "./assets/react.svg";
 import vite from "./assets/vite.svg";
 import { ChatBox } from "./components/chat-box";
+import { GithubIcon } from "./components/icon/Github";
 import { PresencePanel } from "./components/presence-panel";
 import { RestCard } from "./components/rest-card";
 import { RpcCard } from "./components/rpc-card";
@@ -62,7 +62,7 @@ function App() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Github />
+              <GithubIcon />
               Github
             </a>
           )}

@@ -17,6 +17,7 @@
     "effect": "^3.21.0"
   },
   "devDependencies": {
-    "@repo/config-typescript": "workspace:*"
+    "@repo/config-typescript": "workspace:*",
+    "@types/node": "^25.5.0"
   }
 }

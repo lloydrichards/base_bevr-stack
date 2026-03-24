@@ -1,7 +1,7 @@
 {
   "extends": "@repo/config-typescript/base.json",
   "compilerOptions": {
-    "rootDir": "./src",
+    "rootDir": "src",
     "composite": true,
     "declaration": true,
     "declarationMap": true,
