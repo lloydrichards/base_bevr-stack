@@ -64,7 +64,7 @@ export class ChatService extends ServiceMap.Service<ChatServiceApi>()(
       });
 
       return { chat } as const;
-    }) as Effect.Effect<ChatServiceApi, never, LanguageModel.LanguageModel>,
+    }),
   },
 ) {}
 
