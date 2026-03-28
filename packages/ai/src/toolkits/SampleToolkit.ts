@@ -1,5 +1,5 @@
-import { Tool, Toolkit } from "@effect/ai";
 import { Effect, Schema } from "effect";
+import { Tool, Toolkit } from "effect/unstable/ai";
 
 /**
  * Calculator Tool - Safely evaluates mathematical expressions
@@ -7,8 +7,10 @@ import { Effect, Schema } from "effect";
 const calculatorTool = Tool.make("calculate", {
   description:
     "Evaluate a mathematical expression safely. Supports basic arithmetic operations (+, -, *, /), exponentiation (^), and common functions (sin, cos, sqrt, etc). Example: calculate(expression: '2 + 2 * 10')",
-}).setParameters({
-  expression: Schema.String,
+  parameters: Schema.Struct({
+    expression: Schema.String,
+  }),
+  success: Schema.String,
 });
 
 /**
@@ -17,8 +19,10 @@ const calculatorTool = Tool.make("calculate", {
 const echoTool = Tool.make("echo", {
   description:
     "Echo back a message. Useful for testing tool calling. Example: echo(message: 'Hello, World!')",
-}).setParameters({
-  message: Schema.String,
+  parameters: Schema.Struct({
+    message: Schema.String,
+  }),
+  success: Schema.String,
 });
 
 /**
@@ -26,9 +30,9 @@ const echoTool = Tool.make("echo", {
  */
 const getCurrentTimeTool = Tool.make("getCurrentTime", {
   description:
-    "Get the current date and time in UTC. No parameters required. Example: getCurrentTime()",
-}).setParameters({
-  message: Schema.String,
+    "Get the current date and time in a given timezone. Example: getCurrentTime(timezone: 'UTC')",
+  parameters: Tool.EmptyParams,
+  success: Schema.String,
 });
 
 export const SampleToolkit = Toolkit.make(
@@ -63,9 +67,11 @@ export const SampleToolkitLive = SampleToolkit.toLayer(
               return `${params.expression} = ${value}`;
             },
             catch: (error) =>
-              `Invalid expression: ${error instanceof Error ? error.message : String(error)}`,
+              new Error(
+                `Invalid expression: ${error instanceof Error ? error.message : String(error)}`,
+              ),
           }).pipe(
-            Effect.catchAll((error) => Effect.succeed(`Error: ${error}`)),
+            Effect.catch((error) => Effect.succeed(`Error: ${error.message}`)),
           );
         }),
 

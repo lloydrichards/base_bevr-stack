@@ -1,4 +1,5 @@
-import { Result, useAtom } from "@effect-atom/atom-react";
+import { useAtom } from "@effect/atom-react";
+import { AsyncResult } from "effect/unstable/reactivity";
 import { helloAtom } from "@/lib/atoms/hello-atom";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -22,7 +23,7 @@ export const RestCard = () => {
           </Button>
         </CardContent>
       </Card>
-      {Result.builder(response)
+      {AsyncResult.builder(response)
         .onSuccess((data) => (
           <ResponseCard
             state="completed"
@@ -45,11 +46,7 @@ export const RestCard = () => {
             className="flex-1"
           >
             <pre>
-              <code>
-                Error: {error._tag}
-                {"\n"}
-                Details: {JSON.stringify(error ?? {}, null, 2)}
-              </code>
+              <code>Error: {JSON.stringify(error, null, 2)}</code>
             </pre>
           </ResponseCard>
         ))

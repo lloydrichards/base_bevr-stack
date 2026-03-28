@@ -29,4 +29,4 @@ export const ObservabilityLive = Effect.gen(function* () {
       new OTLPTraceExporter({ url: endpoint }),
     ),
   }));
-}).pipe(Layer.unwrapEffect);
+}).pipe(Layer.unwrap);

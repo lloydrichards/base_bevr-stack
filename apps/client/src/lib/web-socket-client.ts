@@ -1,14 +1,17 @@
 import { BrowserSocket } from "@effect/platform-browser";
-import { RpcClient, RpcSerialization } from "@effect/rpc";
-import type { RpcClientError } from "@effect/rpc/RpcClientError";
-import { type Atom, AtomRpc } from "@effect-atom/atom-react";
 import type { WebSocketEvent } from "@repo/domain/WebSocket";
 import { WebSocketRpc } from "@repo/domain/WebSocket";
 import { type Cause, Effect, Layer, Stream } from "effect";
+import { type Atom, AtomRpc } from "effect/unstable/reactivity";
+import {
+  RpcClient,
+  type RpcClientError,
+  RpcSerialization,
+} from "effect/unstable/rpc";
 
 const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:9000/ws";
 
-export class WebSocketClient extends AtomRpc.Tag<WebSocketClient>()(
+export class WebSocketClient extends AtomRpc.Service<WebSocketClient>()(
   "WebSocketClient",
   {
     group: WebSocketRpc,
@@ -24,12 +27,13 @@ export class WebSocketClient extends AtomRpc.Tag<WebSocketClient>()(
 export const presenceSubscriptionAtom: Atom.AtomResultFn<
   void,
   readonly WebSocketEvent[],
-  RpcClientError | Cause.NoSuchElementException
+  RpcClientError.RpcClientError | Cause.NoSuchElementError
 > = WebSocketClient.runtime.fn(() =>
   Effect.gen(function* () {
     yield* Effect.log("Starting presence subscription stream");
     const client = yield* WebSocketClient;
-    return client("subscribe", {});
+    // biome-ignore lint/suspicious/noConfusingVoidType: RPC with no payload requires void argument
+    return client("subscribe", undefined as void);
   }).pipe(
     Effect.map((stream) =>
       stream.pipe(
