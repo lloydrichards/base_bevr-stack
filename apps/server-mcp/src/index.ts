@@ -92,7 +92,7 @@ const DevToolsLive = Effect.gen(function* () {
   if (!config.enableDevTools) {
     return Layer.empty;
   }
-  yield* Effect.log("Enabling DevTools Layer");
+  yield* Effect.logInfo("Enabling DevTools Layer");
   return DevTools.layer();
 }).pipe(Layer.unwrapEffect);
 

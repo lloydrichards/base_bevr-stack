@@ -9,6 +9,7 @@ environment variables are set and no-ops otherwise.
 
 ## Environment
 
+- `LOG_LEVEL`
 - `OTEL_EXPORTER_OTLP_ENDPOINT`
 - `OTEL_SERVICE_NAME`
 

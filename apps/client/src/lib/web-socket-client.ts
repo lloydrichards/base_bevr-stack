@@ -27,7 +27,7 @@ export const presenceSubscriptionAtom: Atom.AtomResultFn<
   RpcClientError | Cause.NoSuchElementException
 > = WebSocketClient.runtime.fn(() =>
   Effect.gen(function* () {
-    yield* Effect.log("Starting presence subscription stream");
+    yield* Effect.logDebug("Starting presence subscription stream");
     const client = yield* WebSocketClient;
     return client("subscribe", {});
   }).pipe(

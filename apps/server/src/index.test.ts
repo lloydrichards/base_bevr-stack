@@ -42,7 +42,7 @@ describe("Server", () => {
     it.effect("can log messages", () =>
       Effect.gen(function* () {
         // Act: Run an effect that logs (logs are suppressed in test context)
-        yield* Effect.log("Test log message");
+        yield* Effect.logDebug("Test log message");
 
         // Assert: Effect completes successfully
         expect(true).toBe(true);

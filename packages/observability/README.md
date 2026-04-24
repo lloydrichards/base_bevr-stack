@@ -9,8 +9,13 @@ providing environment variables instead of wiring exporters per app.
 
 ## Environment
 
+- `LOG_LEVEL`
 - `OTEL_EXPORTER_OTLP_ENDPOINT`
 - `OTEL_SERVICE_NAME`
+
+`LOG_LEVEL` controls the minimum runtime log level for the whole Effect runtime.
+Supported values: `All`, `Trace`, `Debug`, `Info`, `Warning`, `Error`,
+`Fatal`, `None`. The parser also accepts `warn`.
 
 When both are set, tracing is enabled and spans are exported via OTLP over HTTP.
 If either is missing, tracing is disabled with a log message.
@@ -29,7 +34,10 @@ const HttpLive = HttpLayerRouter.serve(Router).pipe(
 
 ## API
 
+- `LogLevelLive`: Layer that loads `LOG_LEVEL` from config and applies it as the
+  runtime minimum log level.
 - `ObservabilityLive`: Layer that configures NodeSdk when env vars are set.
+  It also applies `LogLevelLive`.
 - `Observability`: re-export of `NodeSdk` for advanced configuration.
 
 ## Removing From Apps

@@ -12,7 +12,7 @@ export class PresenceService extends Effect.Service<PresenceService>()(
   "PresenceService",
   {
     effect: Effect.gen(function* () {
-      yield* Effect.log("Initializing PresenceService");
+      yield* Effect.logInfo("Initializing PresenceService");
 
       const clientsRef = yield* Ref.make(
         new Map<typeof ClientId.Type, ClientInfo>(),
@@ -34,7 +34,7 @@ export class PresenceService extends Effect.Service<PresenceService>()(
             client: info,
           });
 
-          yield* Effect.log(`Client added: ${clientId}`);
+          yield* Effect.logDebug(`Client added: ${clientId}`);
         });
 
       const removeClient = (clientId: typeof ClientId.Type) =>
@@ -57,7 +57,7 @@ export class PresenceService extends Effect.Service<PresenceService>()(
               disconnectedAt,
             });
 
-            yield* Effect.log(`Client removed: ${clientId}`);
+            yield* Effect.logDebug(`Client removed: ${clientId}`);
           }
         });
 
@@ -91,7 +91,9 @@ export class PresenceService extends Effect.Service<PresenceService>()(
               changedAt,
             });
 
-            yield* Effect.log(`Client ${clientId} status changed to ${status}`);
+            yield* Effect.logDebug(
+              `Client ${clientId} status changed to ${status}`,
+            );
           }
         });
 

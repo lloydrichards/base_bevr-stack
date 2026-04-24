@@ -11,7 +11,7 @@ export const tickAtom: Atom.AtomResultFn<
 > = runtime.fn(({ abort = false }: { readonly abort?: boolean }) =>
   Stream.unwrap(
     Effect.gen(function* () {
-      yield* Effect.log("Starting Tick Atom Stream");
+      yield* Effect.logDebug("Starting Tick Atom Stream");
       const rpc = yield* RpcClient;
       return rpc.client.tick({ ticks: 10 });
     }).pipe((self) => (abort ? Effect.interrupt : self)),
