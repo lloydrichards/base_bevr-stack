@@ -8,11 +8,13 @@
     "lint": "biome lint .",
     "format": "biome check --write .",
     "format:check": "biome check .",
+    "prepare": "effect-language-service patch",
     "test": "turbo run test",
     "test:e2e": "playwright test",
     "type-check": "turbo run type-check"
   },
   "devDependencies": {
+    "@effect/language-service": "0.85.1",
     "@biomejs/biome": "2.4.8",
     "@playwright/test": "^1.58.2",
     "@types/bun": "^1.3.11",
