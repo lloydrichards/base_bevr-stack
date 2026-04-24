@@ -15,7 +15,7 @@ export class ChatService extends Effect.Service<ChatService>()("ChatService", {
       // Fork the agentic loop to run in background
       yield* Effect.forkScoped(
         Effect.gen(function* () {
-          yield* Effect.log(
+          yield* Effect.logInfo(
             `[craftsman] Creating chat with ${1 + history.length} messages`,
           );
           const systemMessage = String.stripMargin(`
@@ -28,10 +28,10 @@ export class ChatService extends Effect.Service<ChatService>()("ChatService", {
             Prompt.make(history).pipe(Prompt.setSystem(systemMessage)),
           );
 
-          yield* Effect.log(
+          yield* Effect.logTrace(
             Prompt.make(history).pipe(Prompt.setSystem(systemMessage)),
           );
-          yield* Effect.log(yield* session.exportJson);
+          yield* Effect.logTrace(yield* session.exportJson);
 
           const toolkit = yield* Toolkit.merge(SampleToolkit);
 

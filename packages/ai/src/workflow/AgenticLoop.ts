@@ -213,7 +213,7 @@ export const runAgenticLoop = <TR extends Record<string, Tool.Any>>({
 
             const finishReason = yield* loop({ chat, mailbox, toolkit });
 
-            yield* Effect.log(
+            yield* Effect.logDebug(
               `Iteration ${iteration} completed with finishReason: ${finishReason}`,
             );
 
