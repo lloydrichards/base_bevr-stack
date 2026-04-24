@@ -1,5 +1,5 @@
 import type { ChatStreamPart } from "@repo/domain/Chat";
-import { Effect, type Mailbox } from "effect";
+import { Effect, Inspectable, type Mailbox, Schema } from "effect";
 
 /**
  * MailboxEvents - Typed event emitter for ChatStreamPart
@@ -34,7 +34,10 @@ export const createMailboxEvents = (
         });
 
         // Delta (stream arguments as JSON)
-        const argsJson = JSON.stringify(params.arguments, null, 2);
+        const argsJson = yield* Effect.orElseSucceed(
+          Schema.encode(Schema.parseJson({ space: 2 }))(params.arguments),
+          () => Inspectable.toStringUnknown(params.arguments, 2),
+        );
         yield* mailbox.offer({
           _tag: "tool-call-delta",
           id,

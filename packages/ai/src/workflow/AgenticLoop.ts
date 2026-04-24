@@ -1,13 +1,7 @@
 import type { Chat, Tool, Toolkit } from "@effect/ai";
 import type { ChatStreamPart } from "@repo/domain/Chat";
-import { Effect, type Mailbox, Ref, Schema, Stream } from "effect";
+import { Effect, Inspectable, type Mailbox, Ref, Schema, Stream } from "effect";
 import { createMailboxEvents } from "./MailboxEvents";
-
-export const AgenticLoopState = Schema.Struct({
-  finishReason: Schema.String,
-  iteration: Schema.Number,
-});
-// Schema for parsing tool parameters (JSON string -> object with unknown keys/values)
 
 export const ToolParamsSchema = Schema.parseJson(
   Schema.Record({ key: Schema.String, value: Schema.Unknown }),
@@ -109,7 +103,7 @@ const loop = <TR extends Record<string, Tool.Any>>({
                 )(toolCall.params?.trim() || "{}").pipe(
                   Effect.tapError((error) =>
                     Effect.logError(
-                      `Failed to parse tool arguments for ${toolCall.name}: ${JSON.stringify(error)}`,
+                      `Failed to parse tool arguments for ${toolCall.name}: ${Inspectable.toStringUnknown(error, 2)}`,
                     ),
                   ),
                   Effect.orElseSucceed(() => ({})),
@@ -127,11 +121,15 @@ const loop = <TR extends Record<string, Tool.Any>>({
               }
 
               case "tool-result": {
-                const resultText = part.isFailure
-                  ? part.result
-                  : typeof part.result === "string"
+                const resultText =
+                  part.isFailure || typeof part.result === "string"
                     ? part.result
-                    : JSON.stringify(part.result);
+                    : yield* Effect.orElseSucceed(
+                        Schema.encode(Schema.parseJson({ space: 2 }))(
+                          part.result,
+                        ),
+                        () => Inspectable.toStringUnknown(part.result, 2),
+                      );
 
                 if (part.isFailure) {
                   yield* Effect.logError(
@@ -162,7 +160,12 @@ const loop = <TR extends Record<string, Tool.Any>>({
                 yield* events.error(
                   typeof part.error === "string"
                     ? part.error
-                    : JSON.stringify(part.error),
+                    : yield* Effect.orElseSucceed(
+                        Schema.encode(Schema.parseJson({ space: 2 }))(
+                          part.error,
+                        ),
+                        () => Inspectable.toStringUnknown(part.error, 2),
+                      ),
                   false,
                 );
                 break;
