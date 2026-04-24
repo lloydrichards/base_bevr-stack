@@ -4,7 +4,7 @@ import {
   type ClientStatus,
   type WebSocketEvent,
 } from "@repo/domain/WebSocket";
-import { Effect, PubSub, Ref } from "effect";
+import { DateTime, Effect, PubSub, Ref } from "effect";
 
 export type PresenceEventType = typeof WebSocketEvent.Type;
 
@@ -43,6 +43,8 @@ export class PresenceService extends Effect.Service<PresenceService>()(
           const client = clients.get(clientId);
 
           if (client) {
+            const disconnectedAt = yield* DateTime.now;
+
             yield* Ref.update(clientsRef, (clients) => {
               const newClients = new Map(clients);
               newClients.delete(clientId);
@@ -52,7 +54,7 @@ export class PresenceService extends Effect.Service<PresenceService>()(
             yield* PubSub.publish(pubsub, {
               _tag: "user_left",
               clientId,
-              disconnectedAt: Date.now(),
+              disconnectedAt,
             });
 
             yield* Effect.log(`Client removed: ${clientId}`);
@@ -68,6 +70,8 @@ export class PresenceService extends Effect.Service<PresenceService>()(
           const client = clients.get(clientId);
 
           if (client) {
+            const changedAt = yield* DateTime.now;
+
             const updatedClient: ClientInfo = {
               ...client,
               status,
@@ -84,7 +88,7 @@ export class PresenceService extends Effect.Service<PresenceService>()(
               _tag: "status_changed",
               clientId,
               status,
-              changedAt: Date.now(),
+              changedAt,
             });
 
             yield* Effect.log(`Client ${clientId} status changed to ${status}`);

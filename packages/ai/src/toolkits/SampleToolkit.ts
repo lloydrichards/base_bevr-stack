@@ -1,5 +1,5 @@
 import { Tool, Toolkit } from "@effect/ai";
-import { Effect, Schema } from "effect";
+import { DateTime, Effect, Schema } from "effect";
 
 /**
  * Calculator Tool - Safely evaluates mathematical expressions
@@ -77,13 +77,15 @@ export const SampleToolkitLive = SampleToolkit.toLayer(
 
       getCurrentTime: () =>
         Effect.gen(function* () {
-          const now = new Date();
-          const timeString = now.toLocaleString("en-US", {
-            timeZone: "UTC",
+          const now = yield* DateTime.now;
+          const timeString = DateTime.formatUtc(now, {
+            locale: "en-US",
+            dateStyle: "medium",
+            timeStyle: "medium",
           });
           yield* Effect.log(`Current time (UTC): ${timeString}`);
           return yield* Effect.succeed(
-            `Current time in UTC: ${timeString} (ISO: ${now.toISOString()})`,
+            `Current time in UTC: ${timeString} (ISO: ${DateTime.formatIso(now)})`,
           );
         }),
     };

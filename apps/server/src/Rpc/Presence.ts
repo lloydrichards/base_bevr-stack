@@ -4,7 +4,7 @@ import {
   WebSocketRpc,
 } from "@repo/domain/WebSocket";
 import { PresenceService } from "@repo/presence";
-import { Effect, Mailbox, Queue, Stream } from "effect";
+import { DateTime, Effect, Mailbox, Queue, Stream } from "effect";
 
 export const PresenceRpcLive = WebSocketRpc.toLayer(
   Effect.gen(function* () {
@@ -16,7 +16,7 @@ export const PresenceRpcLive = WebSocketRpc.toLayer(
         yield* Effect.log("New presence subscription");
 
         const clientId = presence.generateClientId();
-        const connectedAt = Date.now();
+        const connectedAt = yield* DateTime.now;
         const clientInfo: ClientInfo = {
           clientId,
           status: "online",
