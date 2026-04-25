@@ -11,12 +11,14 @@ status updates, and publishes events through a PubSub.
 ## Usage
 
 ```typescript
-import { PresenceService } from "@repo/presence";
+import { PresenceService, ClientGenerator } from "@repo/presence";
 import { Effect } from "effect";
 
 const program = Effect.gen(function* () {
   const presence = yield* PresenceService;
-  const clientId = presence.generateClientId();
+  const client = yield* ClientGenerator;
+
+  const clientId = yield* client.generateClientId();
   yield* presence.addClient(clientId, {
     clientId,
     status: "online",
