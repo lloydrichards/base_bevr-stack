@@ -1,64 +1,58 @@
-import { Chat, Prompt, Toolkit } from "@effect/ai";
 import type { ChatStreamPart } from "@repo/domain/Chat";
-import { Cause, Effect, Mailbox, String } from "effect";
+import { Cause, Context, Effect, Layer, Queue, String } from "effect";
+import { Chat, Prompt } from "effect/unstable/ai";
 import { SampleToolkit } from "../toolkits/SampleToolkit";
 import { runAgenticLoop } from "../workflow/AgenticLoop";
 
-export class ChatService extends Effect.Service<ChatService>()("ChatService", {
-  scoped: Effect.gen(function* () {
-    const chat = Effect.fn("craftsman")(function* (
-      history: Array<Prompt.Message>,
-    ) {
-      // Create mailbox for streaming events
-      const mailbox = yield* Mailbox.make<typeof ChatStreamPart.Type>();
+export class ChatService extends Context.Service<ChatService>()("ChatService", {
+  make: Effect.gen(function* () {
+    const chat = Effect.fn("chat")(function* (history: Array<Prompt.Message>) {
+      const queue = yield* Queue.make<typeof ChatStreamPart.Type, Cause.Done>();
 
-      // Fork the agentic loop to run in background
       yield* Effect.forkScoped(
         Effect.gen(function* () {
           yield* Effect.logInfo(
             `[craftsman] Creating chat with ${1 + history.length} messages`,
           );
+
           const systemMessage = String.stripMargin(`
               |You are a helpful general assistant.
               |You have access to tools and should use them when appropriate.
               |Be concise and direct in your responses.
             `);
 
-          const session = yield* Chat.fromPrompt(
-            Prompt.make(history).pipe(Prompt.setSystem(systemMessage)),
+          const prompt = Prompt.make(history).pipe(
+            Prompt.setSystem(systemMessage),
           );
+          const session = yield* Chat.fromPrompt(prompt);
 
-          yield* Effect.logTrace(
-            Prompt.make(history).pipe(Prompt.setSystem(systemMessage)),
-          );
-          yield* Effect.logTrace(yield* session.exportJson);
-
-          const toolkit = yield* Toolkit.merge(SampleToolkit);
+          const toolkit = yield* SampleToolkit;
 
           yield* runAgenticLoop({
             chat: session,
-            mailbox,
+            queue,
             toolkit,
           });
         }).pipe(
-          Effect.ensuring(mailbox.end),
-          Effect.catchAllCause((cause) =>
+          Effect.catchCause((cause) =>
             Effect.gen(function* () {
-              yield* Effect.logError(`Agentic loop error: ${cause}`);
-              yield* mailbox.offer({
+              yield* Effect.logError(`Chat error: ${cause}`);
+              yield* Queue.offer(queue, {
                 _tag: "error",
                 message: `System error: ${Cause.pretty(cause)}`,
                 recoverable: false,
               });
-              yield* mailbox.end;
             }),
           ),
+          Effect.ensuring(Queue.end(queue)),
         ),
       );
 
-      return mailbox;
+      return queue;
     });
 
     return { chat } as const;
   }),
-}) {}
+}) {
+  static layer = Layer.effect(ChatService)(ChatService.make);
+}

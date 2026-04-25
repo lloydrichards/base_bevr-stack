@@ -1,10 +1,11 @@
-import { Result, useAtom, useAtomSet } from "@effect-atom/atom-react";
+import { useAtom, useAtomSet } from "@effect/atom-react";
 import type {
   ClientId,
   ClientInfo,
   ClientStatus,
   WebSocketEvent,
 } from "@repo/domain/WebSocket";
+import { AsyncResult } from "effect/unstable/reactivity";
 import { useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -78,7 +79,7 @@ export function PresencePanel({ className }: { className?: string }) {
     startSubscription();
   }, [startSubscription]);
 
-  const events = Result.getOrElse(
+  const events = AsyncResult.getOrElse(
     eventsResult,
     () => [] as readonly WebSocketEvent[],
   );
@@ -115,9 +116,9 @@ export function PresencePanel({ className }: { className?: string }) {
     }
   };
 
-  const isConnected = Result.isSuccess(eventsResult);
-  const isConnecting = Result.isInitial(eventsResult);
-  const hasError = Result.isFailure(eventsResult);
+  const isConnected = AsyncResult.isSuccess(eventsResult);
+  const isConnecting = AsyncResult.isInitial(eventsResult);
+  const hasError = AsyncResult.isFailure(eventsResult);
 
   return (
     <Card className={cn("h-full", className)}>
@@ -149,7 +150,7 @@ export function PresencePanel({ className }: { className?: string }) {
       {/* Error Display */}
       <CardContent className="flex flex-col gap-4">
         {hasError &&
-          Result.match(eventsResult, {
+          AsyncResult.match(eventsResult, {
             onInitial: () => null,
             onSuccess: () => null,
             onFailure: (error) => (
