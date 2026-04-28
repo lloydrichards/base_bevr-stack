@@ -1,239 +1,248 @@
-import type { Chat, Tool, Toolkit } from "@effect/ai";
 import type { ChatStreamPart } from "@repo/domain/Chat";
-import { Effect, Inspectable, type Mailbox, Ref, Schema, Stream } from "effect";
+import {
+  type Cause,
+  Effect,
+  Inspectable,
+  type Queue,
+  Ref,
+  Schema,
+  SchemaGetter,
+  Stream,
+} from "effect";
+import type { Chat, Tool, Toolkit } from "effect/unstable/ai";
 import { createMailboxEvents } from "./MailboxEvents";
 
-export const ToolParamsSchema = Schema.parseJson(
-  Schema.Record({ key: Schema.String, value: Schema.Unknown }),
+export const AgenticLoopState = Schema.Struct({
+  finishReason: Schema.String,
+  iteration: Schema.Number,
+});
+
+export const ToolParamsSchema = Schema.fromJsonString(
+  Schema.Record(Schema.String, Schema.Unknown),
 );
 
-const loop = <TR extends Record<string, Tool.Any>>({
+const stringifyJson = (value: unknown) =>
+  Schema.encodeUnknownEffect(
+    Schema.String.pipe(
+      Schema.decodeTo(Schema.Unknown, {
+        decode: SchemaGetter.parseJson<string>({}),
+        encode: SchemaGetter.stringifyJson({ space: 2 }),
+      }),
+    ),
+  )(value).pipe(
+    Effect.orElseSucceed(() => Inspectable.toStringUnknown(value, 2)),
+  );
+
+const loop = Effect.fn("loop")(function* <
+  Tools extends Record<string, Tool.Any>,
+>({
   chat,
-  mailbox,
+  queue,
   toolkit,
 }: {
   chat: Chat.Service;
-  mailbox: Mailbox.Mailbox<typeof ChatStreamPart.Type>;
-  toolkit: Toolkit.WithHandler<TR>;
-}) =>
-  Effect.gen(function* () {
-    const events = createMailboxEvents(mailbox);
-    const finishReasonRef = yield* Ref.make("stop");
-    const toolParamsRef = yield* Ref.make(
-      new Map<
-        string,
-        {
-          id: string;
-          name: string;
-          params: string;
-        }
-      >(),
+  queue: Queue.Queue<typeof ChatStreamPart.Type, Cause.Done>;
+  toolkit: Toolkit.WithHandler<Tools>;
+}) {
+  const events = createMailboxEvents(queue);
+  const finishReasonRef = yield* Ref.make("stop");
+  const toolParamsRef = yield* Ref.make(
+    new Map<
+      string,
+      {
+        id: string;
+        name: string;
+        params: string;
+      }
+    >(),
+  );
+
+  yield* chat
+    .streamText({
+      prompt: [],
+      toolkit,
+    })
+    .pipe(
+      Stream.runForEach((part) =>
+        Effect.gen(function* () {
+          switch (part.type) {
+            case "text-delta":
+              yield* events.textDelta(part.delta);
+              break;
+
+            case "tool-params-start":
+              yield* Effect.logInfo(`Selected tool: ${part.name}`);
+
+              yield* Ref.update(toolParamsRef, (map) => {
+                const newMap = new Map(map);
+                newMap.set(part.id, {
+                  id: part.id,
+                  name: part.name,
+                  params: "",
+                });
+                return newMap;
+              });
+
+              yield* events.toolCallStart(part.id, {
+                name: part.name,
+              });
+              break;
+
+            case "tool-params-delta": {
+              const toolParamsMap = yield* Ref.get(toolParamsRef);
+              const existing = toolParamsMap.get(part.id);
+
+              if (!existing) {
+                yield* Effect.logError(
+                  `Received tool-params-delta for unknown tool: ${part.id}`,
+                );
+                break;
+              }
+
+              yield* Ref.update(toolParamsRef, (map) => {
+                const newMap = new Map(map);
+                newMap.set(part.id, {
+                  ...existing,
+                  params: existing.params + part.delta,
+                });
+                return newMap;
+              });
+
+              yield* events.toolCallDelta(part.id, {
+                argumentsDelta: part.delta,
+              });
+              break;
+            }
+
+            case "tool-params-end": {
+              const toolParamsMap = yield* Ref.get(toolParamsRef);
+              const toolCall = toolParamsMap.get(part.id);
+
+              if (!toolCall) {
+                yield* Effect.logError(
+                  `Received tool-params-end for unknown tool: ${part.id}`,
+                );
+                break;
+              }
+
+              const parsedParams = yield* Schema.decodeUnknownEffect(
+                ToolParamsSchema,
+              )(toolCall.params?.trim() || "{}").pipe(
+                Effect.tapError((error) =>
+                  Effect.logError(
+                    `Failed to parse tool arguments for ${toolCall.name}: ${Inspectable.toStringUnknown(error, 2)}`,
+                  ),
+                ),
+                Effect.orElseSucceed(() => ({})),
+              );
+
+              yield* events.toolCallComplete(toolCall.id, {
+                name: toolCall.name,
+                arguments: parsedParams,
+              });
+
+              yield* events.toolExecutionStart(toolCall.id, {
+                name: toolCall.name,
+              });
+              break;
+            }
+
+            case "tool-result": {
+              const resultText =
+                typeof part.result === "string"
+                  ? part.result
+                  : yield* stringifyJson(part.result);
+
+              if (part.isFailure) {
+                yield* Effect.logError(
+                  `Tool ${part.name}(${part.id}) failed: ${resultText}`,
+                );
+              }
+
+              yield* events.toolExecutionComplete(part.id, {
+                name: part.name,
+                result: resultText,
+                success: !part.isFailure,
+              });
+              break;
+            }
+
+            case "finish":
+              yield* Ref.set(finishReasonRef, part.reason);
+              if (part.reason !== "tool-calls") {
+                yield* events.finish(part.reason, {
+                  promptTokens: part.usage.inputTokens.total ?? 0,
+                  completionTokens: part.usage.outputTokens.total ?? 0,
+                  totalTokens:
+                    (part.usage.inputTokens.total ?? 0) +
+                    (part.usage.outputTokens.total ?? 0),
+                });
+              }
+              break;
+
+            case "error":
+              yield* events.error(
+                typeof part.error === "string"
+                  ? part.error
+                  : yield* stringifyJson(part.error),
+                false,
+              );
+              break;
+
+            default:
+              break;
+          }
+        }),
+      ),
     );
 
-    yield* chat
-      .streamText({
-        prompt: [],
-        toolkit,
-      })
-      .pipe(
-        Stream.runForEach((part) =>
-          Effect.gen(function* () {
-            switch (part.type) {
-              case "text-delta":
-                yield* events.textDelta(part.delta);
-                break;
+  return yield* Ref.get(finishReasonRef);
+});
 
-              case "tool-params-start":
-                yield* Effect.logInfo(`Selected tool: ${part.name}`);
-
-                yield* Ref.update(toolParamsRef, (map) => {
-                  const newMap = new Map(map);
-                  newMap.set(part.id, {
-                    id: part.id,
-                    name: part.name,
-                    params: "",
-                  });
-                  return newMap;
-                });
-
-                yield* events.toolCallStart(part.id, {
-                  name: part.name,
-                });
-                break;
-
-              case "tool-params-delta": {
-                const toolParamsMap = yield* Ref.get(toolParamsRef);
-                const existing = toolParamsMap.get(part.id);
-
-                if (!existing) {
-                  yield* Effect.logError(
-                    `Received tool-params-delta for unknown tool: ${part.id}`,
-                  );
-                  break;
-                }
-
-                yield* Ref.update(toolParamsRef, (map) => {
-                  const newMap = new Map(map);
-                  newMap.set(part.id, {
-                    ...existing,
-                    params: existing.params + part.delta,
-                  });
-                  return newMap;
-                });
-
-                yield* events.toolCallDelta(part.id, {
-                  argumentsDelta: part.delta,
-                });
-                break;
-              }
-
-              case "tool-params-end": {
-                const toolParamsMap = yield* Ref.get(toolParamsRef);
-                const toolCall = toolParamsMap.get(part.id);
-
-                if (!toolCall) {
-                  yield* Effect.logError(
-                    `Received tool-params-end for unknown tool: ${part.id}`,
-                  );
-                  break;
-                }
-
-                const parsedParams = yield* Schema.decodeUnknown(
-                  ToolParamsSchema,
-                )(toolCall.params?.trim() || "{}").pipe(
-                  Effect.tapError((error) =>
-                    Effect.logError(
-                      `Failed to parse tool arguments for ${toolCall.name}: ${Inspectable.toStringUnknown(error, 2)}`,
-                    ),
-                  ),
-                  Effect.orElseSucceed(() => ({})),
-                );
-
-                yield* events.toolCallComplete(toolCall.id, {
-                  name: toolCall.name,
-                  arguments: parsedParams,
-                });
-
-                yield* events.toolExecutionStart(toolCall.id, {
-                  name: toolCall.name,
-                });
-                break;
-              }
-
-              case "tool-result": {
-                const resultText =
-                  part.isFailure || typeof part.result === "string"
-                    ? part.result
-                    : yield* Effect.orElseSucceed(
-                        Schema.encode(Schema.parseJson({ space: 2 }))(
-                          part.result,
-                        ),
-                        () => Inspectable.toStringUnknown(part.result, 2),
-                      );
-
-                if (part.isFailure) {
-                  yield* Effect.logError(
-                    `⚠️  Tool ${part.name}(${part.id}) failed: ${resultText}`,
-                  );
-                }
-
-                yield* events.toolExecutionComplete(part.id, {
-                  name: part.name,
-                  result: resultText,
-                  success: !part.isFailure,
-                });
-                break;
-              }
-
-              case "finish":
-                yield* Ref.set(finishReasonRef, part.reason);
-                if (part.reason !== "tool-calls") {
-                  yield* events.finish(part.reason, {
-                    promptTokens: part.usage.inputTokens ?? 0,
-                    completionTokens: part.usage.outputTokens ?? 0,
-                    totalTokens: part.usage.totalTokens ?? 0,
-                  });
-                }
-                break;
-
-              case "error":
-                yield* events.error(
-                  typeof part.error === "string"
-                    ? part.error
-                    : yield* Effect.orElseSucceed(
-                        Schema.encode(Schema.parseJson({ space: 2 }))(
-                          part.error,
-                        ),
-                        () => Inspectable.toStringUnknown(part.error, 2),
-                      ),
-                  false,
-                );
-                break;
-
-              default:
-                // Ignore other part types (reasoning, files, etc.)
-                break;
-            }
-          }),
-        ),
-        Stream.runDrain,
-      );
-
-    return yield* Ref.get(finishReasonRef);
-  });
-
-export const runAgenticLoop = <TR extends Record<string, Tool.Any>>({
+export const runAgenticLoop = Effect.fn("runAgenticLoop")(function* <
+  Tools extends Record<string, Tool.Any>,
+>({
   chat,
-  mailbox,
+  queue,
   toolkit,
   maxIterations = 12,
 }: {
   chat: Chat.Service;
-  mailbox: Mailbox.Mailbox<typeof ChatStreamPart.Type>;
-  toolkit: Toolkit.WithHandler<TR>;
+  queue: Queue.Queue<typeof ChatStreamPart.Type, Cause.Done>;
+  toolkit: Toolkit.WithHandler<Tools>;
   maxIterations?: number;
-}) =>
-  Effect.gen(function* () {
-    const events = createMailboxEvents(mailbox);
+}) {
+  const events = createMailboxEvents(queue);
 
-    const finalState = yield* Effect.iterate(
-      {
-        finishReason: "tool-calls",
-        iteration: 0,
-      },
-      {
-        while: (state) =>
-          state.finishReason === "tool-calls" &&
-          state.iteration < maxIterations,
-        body: (state) =>
-          Effect.gen(function* () {
-            const iteration = state.iteration + 1;
+  let state = { finishReason: "tool-calls", iteration: 0 };
 
-            yield* events.iterationStart(iteration);
+  while (
+    state.finishReason === "tool-calls" &&
+    state.iteration < maxIterations
+  ) {
+    const iteration = state.iteration + 1;
 
-            const finishReason = yield* loop({ chat, mailbox, toolkit });
+    yield* events.iterationStart(iteration);
 
-            yield* Effect.logDebug(
-              `Iteration ${iteration} completed with finishReason: ${finishReason}`,
-            );
+    const finishReason = yield* loop({ chat, queue, toolkit });
 
-            return {
-              finishReason,
-              iteration,
-            };
-          }),
-      },
+    yield* Effect.logDebug(
+      `Iteration ${iteration} completed with finishReason: ${finishReason}`,
     );
 
-    // Handle max iterations case
-    if (
-      finalState.finishReason === "tool-calls" &&
-      finalState.iteration >= maxIterations
-    ) {
-      yield* events.thinking(
-        `Reached maximum iterations (${maxIterations}). Stopping here.`,
-      );
-    }
+    state = { finishReason, iteration };
+  }
 
-    return finalState;
-  });
+  const finalState = state;
+
+  if (
+    finalState.finishReason === "tool-calls" &&
+    finalState.iteration >= maxIterations
+  ) {
+    yield* events.thinking(
+      `Reached maximum iterations (${maxIterations}). Stopping here.`,
+    );
+  }
+
+  return finalState;
+});

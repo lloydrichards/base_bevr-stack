@@ -3,19 +3,20 @@ import {
   type WebSocketEvent,
   WebSocketRpc,
 } from "@repo/domain/WebSocket";
-import { PresenceService } from "@repo/presence";
-import { DateTime, Effect, Mailbox, Queue, Stream } from "effect";
+import { ClientGenerator, PresenceService } from "@repo/presence";
+import { DateTime, Effect, Layer, Queue, Stream } from "effect";
 
 export const PresenceRpcLive = WebSocketRpc.toLayer(
   Effect.gen(function* () {
     const presence = yield* PresenceService;
+    const gen = yield* ClientGenerator;
     yield* Effect.logInfo("Starting Presence RPC Live Implementation");
 
-    return {
+    return WebSocketRpc.of({
       subscribe: Effect.fn(function* () {
         yield* Effect.logDebug("New presence subscription");
 
-        const clientId = presence.generateClientId();
+        const clientId = yield* gen.generateClientId();
         const connectedAt = yield* DateTime.now;
         const clientInfo: ClientInfo = {
           clientId,
@@ -23,14 +24,11 @@ export const PresenceRpcLive = WebSocketRpc.toLayer(
           connectedAt,
         };
 
-        const mailbox = yield* Mailbox.make<WebSocketEvent>();
-
-        // CRITICAL: Subscribe to PubSub FIRST to ensure we don't miss any events
-        const subscription = yield* presence.subscribe();
+        const queue = yield* Queue.unbounded<WebSocketEvent>();
 
         // Fork the stream consumer to handle incoming PubSub events
         yield* Effect.forkScoped(
-          Stream.fromQueue(subscription).pipe(
+          presence.subscribe.pipe(
             Stream.tap((event) =>
               Effect.gen(function* () {
                 // Filter out our own user_joined event since we send "connected" instead
@@ -40,15 +38,14 @@ export const PresenceRpcLive = WebSocketRpc.toLayer(
                 ) {
                   return;
                 }
-                yield* mailbox.offer(event);
+                yield* Queue.offer(queue, event);
               }),
             ),
             Stream.runDrain,
             Effect.ensuring(
               Effect.gen(function* () {
-                yield* Queue.shutdown(subscription);
                 yield* presence.removeClient(clientId);
-                yield* mailbox.end;
+                yield* Queue.shutdown(queue);
                 yield* Effect.logDebug(
                   `Presence subscription ended for ${clientId}`,
                 );
@@ -58,13 +55,13 @@ export const PresenceRpcLive = WebSocketRpc.toLayer(
         );
 
         // Get existing clients BEFORE adding ourselves
-        const existingClients = yield* presence.getClients();
+        const existingClients = presence.getClients();
 
         // Now add ourselves - this publishes user_joined to PubSub for other clients
         yield* presence.addClient(clientId, clientInfo);
 
         // Send our own connected event (not user_joined since we're the one connecting)
-        yield* mailbox.offer({
+        yield* Queue.offer(queue, {
           _tag: "connected",
           clientId,
           connectedAt,
@@ -72,13 +69,13 @@ export const PresenceRpcLive = WebSocketRpc.toLayer(
 
         // Send existing clients as user_joined events so we know who's already here
         for (const client of existingClients) {
-          yield* mailbox.offer({
+          yield* Queue.offer(queue, {
             _tag: "user_joined",
             client,
           });
         }
 
-        return mailbox;
+        return queue;
       }),
 
       setStatus: Effect.fn(function* (payload) {
@@ -90,10 +87,13 @@ export const PresenceRpcLive = WebSocketRpc.toLayer(
       }),
 
       getPresence: Effect.fn(function* () {
-        const clients = yield* presence.getClients();
+        const clients = presence.getClients();
         yield* Effect.logDebug(`Returning ${clients.length} clients`);
         return { clients: [...clients] };
       }),
-    };
+    });
   }),
+).pipe(
+  Layer.provide(PresenceService.layer),
+  Layer.provide(ClientGenerator.layer),
 );

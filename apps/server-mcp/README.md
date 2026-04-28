@@ -23,7 +23,7 @@ From the monorepo root:
 bun dev --filter=server-mcp
 
 # Build for production
-bun build --filter=server-mcp
+bun run build --filter=server-mcp
 
 # Test MCP server functionality (MCPJam Inspector)
 bun --filter=server-mcp run inspector

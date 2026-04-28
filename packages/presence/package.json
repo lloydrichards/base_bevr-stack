@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@repo/domain": "workspace:*",
-    "effect": "^3.21.0"
+    "effect": "4.0.0-beta.47"
   },
   "devDependencies": {
     "@repo/config-typescript": "workspace:*",
-    "@types/node": "^25.5.0"
+    "@types/node": "^25.6.0"
   }
 }
