@@ -15,9 +15,9 @@
   "dependencies": {
     "@effect/ai": "^0.35.0",
     "@effect/ai-anthropic": "^0.25.0",
-    "@effect/platform": "^0.96.0",
+    "@effect/platform": "^0.96.1",
     "@repo/domain": "workspace:*",
-    "effect": "^3.21.0"
+    "effect": "^3.21.2"
   },
   "devDependencies": {
     "@repo/config-typescript": "workspace:*"
