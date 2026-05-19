@@ -49,3 +49,7 @@ tsconfig.tsbuildinfo
 
 # References
 .reference
+
+# direnv
+
+.direnv

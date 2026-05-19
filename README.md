@@ -23,10 +23,29 @@ but the addition of Effect and Turborepo. Includes a Model Context Protocol
 
 ## Quick Start
 
-```bash
-# Install dependencies
-bun install
+### Nix + direnv (recommended)
 
+If you have [Nix](https://nixos.org/) and [direnv](https://direnv.net/) installed, the dev environment activates automatically:
+
+```bash
+direnv allow
+bun install
+```
+
+The flake provides bun, node, and corepack.
+
+### Manual setup
+
+If you prefer not to use Nix, ensure you have [Bun 1.2+](https://bun.sh/) and
+[Node.js 24+](https://nodejs.org/) installed.
+
+```bash
+bun install
+```
+
+### Development
+
+```bash
 # Start development
 bun dev
 
