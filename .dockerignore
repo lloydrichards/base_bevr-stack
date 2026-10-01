@@ -1,6 +1,5 @@
 # Dependencies
 node_modules
-bun.lockb
 
 # Build outputs
 dist
@@ -26,3 +25,9 @@ Thumbs.db
 
 # Logs
 *.log
+# Local source references and test artifacts
+.reference
+coverage
+test-results
+playwright-report
+.vitest-attachments

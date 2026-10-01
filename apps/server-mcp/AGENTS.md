@@ -4,14 +4,17 @@
 
 ## Commands
 
-| Command                        | Purpose                      |
-| ------------------------------ | ---------------------------- |
-| `bun dev --filter=server-mcp`  | Start MCP server (port 9009) |
-| `bun test --filter=server-mcp` | Run MCP tests                |
+| Command                                 | Purpose                      |
+| --------------------------------------- | ---------------------------- |
+| `bun run dev --filter=server-mcp`       | Start MCP server (port 9009) |
+| `bun --filter=server-mcp run inspector` | Open the MCP inspector       |
 
 ## MCP Components
 
 ```typescript
+import { Effect, Layer, Schema } from "effect";
+import { McpServer, Tool, Toolkit } from "effect/ai";
+
 // 1. Resources - static content
 McpServer.resource({
   uri: "app://primer",
@@ -23,7 +26,7 @@ McpServer.resource({
 // 2. Prompts - parameterized templates
 McpServer.prompt({
   name: "Hello Prompt",
-  parameters: Schema.Struct({ name: Schema.String }),
+  parameters: { name: Schema.String },
   content: ({ name }) => Effect.succeed(`Hello, ${name}!`),
 });
 
@@ -31,7 +34,7 @@ McpServer.prompt({
 class MyTools extends Toolkit.make(
   Tool.make("ToolName", {
     description: "Tool description",
-    parameters: { arg: Schema.String },
+    parameters: Schema.Struct({ arg: Schema.String }),
     success: Schema.String,
     failure: Schema.Never,
   })
@@ -40,31 +43,24 @@ class MyTools extends Toolkit.make(
 // Implement tools
 McpServer.toolkit(MyTools).pipe(
   Layer.provide(
-    MyTools.toLayer(
-      Effect.succeed({
-        ToolName: ({ arg }) => Effect.succeed(`Result: ${arg}`),
-      })
-    )
+    MyTools.toLayer({
+      ToolName: ({ arg }) => Effect.succeed(`Result: ${arg}`),
+    })
   )
 );
 ```
 
-## Layer Composition
+## Layer composition
 
-```typescript
-// Merge all MCP components
-const McpLive = Layer.mergeAll(ResourceLayer, PromptLayer, ToolLayer);
+See [`src/index.ts`](src/index.ts) for the complete setup. It uses
+`McpServer.layerHttp` from `effect/ai`, `HttpRouter.serve` from `effect/http`,
+and `BunHttpServer.layerConfig` from `@effect/platform-bun`.
 
-// Create HTTP router
-const McpRouter = McpServer.layerHttpRouter({
-  name: "Server Name",
-  version: "0.1.0",
-  path: "/mcp",
-}).pipe(Layer.provideMerge(McpLive));
+The `protocols` array in that file selects the supported MCP versions.
+Keep that array explicit when changing protocol support.
 
-// Serve
-HttpLayerRouter.serve(McpRouter).pipe(Layer.launch);
-```
+There are currently no MCP unit tests. Use the inspector command in
+[README.md](README.md) to check tools, resources, and prompts interactively.
 
 ## Environment
 

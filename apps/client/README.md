@@ -8,7 +8,7 @@ React frontend built with Vite and TypeScript, part of the
 - **React 19** - UI framework
 - **Vite 8** - Build tool and dev server
 - **TypeScript** - Type safety
-- **Effect 4-beta** - Functional programming utilities
+- **Effect 4** - Functional programming utilities
 - **@repo/domain** - Shared types and schemas
 
 ## Getting Started
@@ -17,7 +17,7 @@ From the monorepo root:
 
 ```bash
 # Start development server
-bun dev --filter=client
+bun run dev --filter=client
 
 # Build for production
 bun run build --filter=client
@@ -35,18 +35,14 @@ The client is a standard React application with:
 
 ## Example Usage
 
-```typescript
-import { ApiResponse } from "@repo/domain";
-
-// Type-safe API calls
-const response = await fetch("/api/hello");
-// Decode the response using Effect Schema
-const res = Schema.decodeUnknownSync(ApiResponse)(await req.json());
-```
+The REST atom uses `HttpApiClient.make(Api)` with the server URL from
+`VITE_SERVER_URL`. The greeting endpoint is `GET /hello/`.
+See [`hello-atom.ts`](src/lib/atoms/hello-atom.ts) for the request and
+[`rest-card.tsx`](src/components/rest-card.tsx) for `AsyncResult` rendering.
 
 ## Testing
 
-The client uses **Vitest 4.x with Browser Mode** (Playwright) for testing React
+The client uses **Vitest 5 with Browser Mode** (Playwright) for testing React
 components in a real browser environment.
 
 ```bash
@@ -60,23 +56,13 @@ bun run test --filter=client
 - **vitest-browser-react**: React testing utilities for Browser Mode
 - **CSS Support**: Tailwind CSS is processed during tests
 
-**Test File Structure:**
-
-```typescript
-import { render } from "vitest-browser-react";
-import { expect, test } from "vitest";
-import { App } from "./app";
-
-test("renders app", async () => {
-  const screen = render(<App />);
-  await expect.element(screen.getByText("Hello")).toBeInTheDocument();
-});
-```
+See [`app.test.tsx`](src/app.test.tsx) for the component test, including its
+atom mocks. `App` is a default export (`import App from "./app"`).
 
 Tests are colocated with source files using the `*.test.tsx` pattern.
 
 ## Learn More
 
 - [React Documentation](https://react.dev)
-- [Vite Documentation](https://vitejs.dev)
+- [Vite Documentation](https://vite.dev)
 - [bEvr Stack Overview](../../README.md)

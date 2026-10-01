@@ -1,6 +1,6 @@
 # Server API
 
-[Effect Platform](https://effect.website/docs/platform) backend API with
+[Effect HTTP](https://github.com/Effect-TS/effect/tree/main/packages/effect/src/http) backend API with
 TypeScript, part of the [bEvr stack](../../README.md).
 
 ## Stack
@@ -12,11 +12,15 @@ TypeScript, part of the [bEvr stack](../../README.md).
 
 ## Getting Started
 
+Copy the root `.env.example` to `apps/server/.env` and set
+`ANTHROPIC_API_KEY`. The server requires the key at startup, including when
+you only use REST or presence.
+
 From the monorepo root:
 
 ```bash
 # Start development server
-bun dev --filter=server
+bun run dev --filter=server
 
 # Build for production
 bun run build --filter=server
@@ -32,35 +36,32 @@ handling:
 - **Type-safe Routes**: Shared types from `@repo/domain`
 - **CORS Support**: Pre-configured for client communication
 - **Effect Integration**: Functional error handling and data processing
-- **Environment Agnostic**: Deploy to any JavaScript runtime
+- **Bun runtime**: Uses `@effect/platform-bun` for HTTP serving
 
 ## Example Route
 
 ```typescript
-import { ApiResponse } from "@repo/domain";
+import { Api, type ApiResponse } from "@repo/domain/Api";
+import { Effect } from "effect";
+import { HttpApiBuilder } from "effect/http-api";
 
-// Define API Group
-class HelloGroup extends HttpApiGroup.make("hello")
-  .add(HttpApiEndpoint.get("get", "/").addSuccess(ApiResponse))
-  .prefix("/hello") {}
-
-const Api = HttpApi.make("Api").add(HelloGroup);
-
-// Define Live Handler
 const HelloGroupLive = HttpApiBuilder.group(Api, "hello", (handlers) =>
   handlers.handle("get", () => {
     const data: typeof ApiResponse.Type = {
-        message: "Hello bEvr!",
+      message: "Hello bEvr!",
       success: true,
     };
     return Effect.succeed(data);
-  })
+  }),
 );
 ```
 
+The shared definition in [`Api.ts`](../../packages/domain/src/Api.ts) exposes
+this handler at `GET /hello/`.
+
 ## Testing
 
-The server uses **Vitest 4.x** with **@effect/vitest** for testing Effect-based
+The server uses **Vitest 5** with **@effect/vitest** for testing Effect-based
 code.
 
 ```bash
@@ -71,27 +72,12 @@ bun run test --filter=server
 bun run test --filter=server -- src/index.test.ts
 ```
 
-**Effect Testing Patterns:**
-
-```typescript
-import { Effect } from "effect";
-import { describe, expect, it } from "@effect/vitest";
-
-describe("MyService", () => {
-  it.effect("should return data", () =>
-    Effect.gen(function* () {
-      const service = yield* MyService;
-      const result = yield* service.getData();
-      expect(result).toEqual(expectedData);
-    })
-  );
-});
-```
+See [`src/index.test.ts`](src/index.test.ts) for complete `it.effect` examples.
 
 Use `it.effect()` for tests that return Effect values. The test runner
 automatically handles Effect execution and error propagation.
 
 ## Learn More
 
-- [Effect Documentation](https://effect.website)
+- [Effect 4 source](https://github.com/Effect-TS/effect)
 - [bEvr Stack Overview](../../README.md)

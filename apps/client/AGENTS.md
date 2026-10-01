@@ -4,39 +4,21 @@
 
 ## Commands
 
-| Command                    | Purpose                      |
-| -------------------------- | ---------------------------- |
-| `bun dev --filter=client`  | Start dev server (port 3000) |
-| `bun test --filter=client` | Run client tests             |
+| Command                        | Purpose                      |
+| ------------------------------ | ---------------------------- |
+| `bun run dev --filter=client`  | Start dev server (port 3000) |
+| `bun run test --filter=client` | Run client tests             |
 
 ## State Management: Effect Atom
 
-**Not standard Jotai** - Uses `@effect-atom/atom-react` (Effect-based atoms).
+Uses `@effect/atom-react` hooks and atoms from `effect/reactivity`.
 
-```typescript
-// Define atoms in lib/, not components
-export const myAtom = runtime.fn(() =>
-  Effect.gen(function* () {
-    const client = yield* MyService;
-    return yield* client.getData();
-  })
-);
+Define atoms in `lib/` and consume them with `useAtom` or `useAtomSet`.
+Use `AsyncResult` from `effect/reactivity` to render loading, success, and
+failure states. See [`rest-card.tsx`](src/components/rest-card.tsx) for the
+rendering pattern and [`web-socket-client.ts`](src/lib/web-socket-client.ts)
+for `AtomRpc.Service` and mutations.
 
-// Component usage
-const [result, trigger] = useAtom(myAtom);
-const data = Result.getOrElse(result, () => defaultValue);
-
-// Result pattern matching
-Result.match(result, {
-  onInitial: () => <Loading />,
-  onSuccess: (data) => <Data data={data} />,
-  onFailure: (error) => <Error error={error} />,
-});
-
-// Mutations via WebSocket
-const setStatus = useAtomSet(WebSocketClient.mutation("setStatus"));
-setStatus({ payload: { clientId, status } });
-```
 
 ## Data Flow
 
@@ -44,7 +26,7 @@ setStatus({ payload: { clientId, status } });
 | ------------- | ------------------------------------- | ---------------------------- |
 | **REST API**  | `HttpApiClient.make(Api)`             | `useAtom(helloAtom)`         |
 | **HTTP RPC**  | `RpcClient.make(EventRpc)`            | `useAtom(tickAtom)` (stream) |
-| **WebSocket** | `AtomRpc.Tag` + `layerProtocolSocket` | `useAtom` + `useAtomSet`     |
+| **WebSocket** | `AtomRpc.Service` + `layerProtocolSocket` | `useAtom` + `useAtomSet`     |
 
 ## Component Patterns
 

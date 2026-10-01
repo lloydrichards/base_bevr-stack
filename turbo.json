@@ -9,13 +9,27 @@
     },
     "dev": {
       "persistent": true,
-      "cache": false
+      "cache": false,
+      "passThroughEnv": [
+        "ANTHROPIC_API_KEY",
+        "PORT",
+        "HOST",
+        "IDLE_TIMEOUT",
+        "ALLOWED_ORIGINS",
+        "MCP_PORT",
+        "DEVTOOLS",
+        "LOG_LEVEL",
+        "OTEL_EXPORTER_OTLP_ENDPOINT",
+        "OTEL_SERVICE_NAME",
+        "VITE_*"
+      ]
     },
     "type-check": {
       "dependsOn": ["^type-check"]
     },
     "test": {
-      "dependsOn": ["^test"]
+      "dependsOn": ["^test"],
+      "passThroughEnv": ["CI"]
     },
     "clean": {
       "cache": false
@@ -24,5 +38,6 @@
     "//#lint": {
       "cache": false
     }
-  }
+  },
+  "globalDependencies": [".env*", "tsconfig.json", "biome.jsonc"]
 }

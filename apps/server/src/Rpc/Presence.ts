@@ -4,7 +4,7 @@ import {
   WebSocketRpc,
 } from "@repo/domain/WebSocket";
 import { ClientGenerator, PresenceService } from "@repo/presence";
-import { DateTime, Effect, Layer, Queue, Stream } from "effect";
+import { DateTime, Effect, Layer, PubSub, Queue, Stream } from "effect";
 
 export const PresenceRpcLive = WebSocketRpc.toLayer(
   Effect.gen(function* () {
@@ -25,10 +25,12 @@ export const PresenceRpcLive = WebSocketRpc.toLayer(
         };
 
         const queue = yield* Queue.unbounded<WebSocketEvent>();
+        // Acquire before the relay starts so early broadcasts stay buffered.
+        const subscription = yield* PubSub.subscribe(presence.pubsub);
 
         // Fork the stream consumer to handle incoming PubSub events
         yield* Effect.forkScoped(
-          presence.subscribe.pipe(
+          Stream.fromEffectRepeat(PubSub.take(subscription)).pipe(
             Stream.tap((event) =>
               Effect.gen(function* () {
                 // Filter out our own user_joined event since we send "connected" instead

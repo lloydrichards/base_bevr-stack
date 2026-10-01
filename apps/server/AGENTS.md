@@ -4,116 +4,83 @@
 
 ## Commands
 
-| Command                                        | Purpose                  |
-| ---------------------------------------------- | ------------------------ |
-| `bun dev --filter=server`                      | Start server (port 9000) |
-| `bun test --filter=server`                     | Run server tests         |
-| `bun test --filter=server -- src/file.test.ts` | Run single test          |
+| Command                                            | Purpose                  |
+| -------------------------------------------------- | ------------------------ |
+| `bun run dev --filter=server`                      | Start server (port 9000) |
+| `bun run test --filter=server`                     | Run server tests         |
+| `bun run test --filter=server -- src/file.test.ts` | Run single test          |
 
-## Effect Service Pattern
+## Effect service pattern
+
+Use `Context.Service` with an explicit layer. See
+[`PresenceService`](../../packages/presence/src/services/PresenceService.ts) and
+[`ChatService`](../../packages/ai/src/services/ChatService.ts).
 
 ```typescript
-// Define service with Effect.Service
-export class MyService extends Effect.Service<MyService>()("MyService", {
-  effect: Effect.gen(function* () {
-    // Initialize dependencies
-    const ref = yield* Ref.make(initialState);
-    const pubsub = yield* PubSub.unbounded<Event>();
+import { Context, Effect, Layer, Ref } from "effect";
 
+export class MyService extends Context.Service<MyService>()("MyService", {
+  make: Effect.gen(function* () {
+    const ref = yield* Ref.make(0);
     return {
-      // Methods return Effect, use Effect.gen internally
-      getData: () =>
-        Effect.gen(function* () {
-          return yield* Ref.get(ref);
-        }),
-      subscribe: () => PubSub.subscribe(pubsub),
+      getData: () => Effect.gen(function* () {
+        return yield* Ref.get(ref);
+      }),
     };
   }),
-}) {}
-
-// Use MyService.Default as Layer
+}) {
+  static layer = Layer.effect(MyService)(MyService.make);
+}
 ```
 
-## RPC Implementation Pattern
+## RPC implementation pattern
+
+Use `RpcGroup.toLayer` and the group's `of` method to define handlers.
+See [`EventRpcLive`](src/Rpc/Event.ts) for HTTP streams and
+[`PresenceRpcLive`](src/Rpc/Presence.ts) for WebSocket presence.
+
+Finite RPC streams return `Queue.Queue<Event, Cause.Done>`. End them with
+`Queue.end` so consumers receive buffered events before completion.
 
 ```typescript
-// HTTP RPC (request/response or streaming)
-const MyRpcLive = MyRpc.toLayer(
-  Effect.gen(function* () {
-    const service = yield* MyService; // Access dependency via yield*
+import { type Cause, Effect, Queue } from "effect";
 
-    return {
-      // Use Effect.fn for handlers
-      myMethod: Effect.fn(function* (payload) {
-        return yield* service.getData();
-      }),
-
-      // Streaming: return Mailbox
-      myStream: Effect.fn(function* (payload) {
-        const mailbox = yield* Mailbox.make<Event>();
-
-        yield* Effect.forkScoped(
-          Effect.gen(function* () {
-            yield* mailbox.offer({ _tag: "start" });
-            // ... send events
-            yield* mailbox.offer({ _tag: "end" });
-          }).pipe(Effect.ensuring(mailbox.end)) // Always cleanup!
-        );
-
-        return mailbox;
-      }),
-    };
-  })
-);
+const makeStream = Effect.gen(function* () {
+  const queue = yield* Queue.unbounded<string, Cause.Done>();
+  yield* Effect.forkScoped(
+    Effect.gen(function* () {
+      yield* Queue.offer(queue, "start");
+      yield* Queue.offer(queue, "end");
+    }).pipe(Effect.ensuring(Queue.end(queue))),
+  );
+  return queue;
+});
 ```
 
-## Layer Composition
+`Effect.forkScoped` ties producers to the request scope. Acquire PubSub
+subscriptions before publishing events that those subscriptions must receive.
 
-```typescript
-// 1. Create router with RPC group
-const HttpRpcRouter = RpcServer.layerHttpRouter({
-  group: EventRpc,
-  path: "/rpc",
-  protocol: "http", // or "websocket" for real-time
-}).pipe(
-  Layer.provide(MyRpcLive), // Provide RPC implementation
-  Layer.provide(MyService.Default), // Provide service dependencies
-  Layer.provide(RpcSerialization.layerNdjson)
-);
+## Layer composition
 
-// 2. Merge routers
-const AllRouters = Layer.mergeAll(ApiRouter, HttpRpcRouter, WebSocketRouter);
+[`src/index.ts`](src/index.ts) composes the server:
 
-// 3. Serve with configuration
-HttpLayerRouter.serve(AllRouters).pipe(
-  Layer.provide(BunHttpServer.layerConfig(ServerConfig)),
-  Layer.launch
-);
-```
-
-## Concurrency Patterns
-
-| Primitive | Purpose             | Usage                                    |
-| --------- | ------------------- | ---------------------------------------- |
-| `Ref`     | Mutable state       | `yield* Ref.make(...)`, `Ref.update()`   |
-| `PubSub`  | Broadcasting        | `PubSub.publish()`, `PubSub.subscribe()` |
-| `Mailbox` | Streaming responses | `mailbox.offer()`, return from RPC       |
-| `Stream`  | Process sequences   | `Stream.fromQueue()`, `Stream.tap()`     |
-
-## Key Patterns
-
-- **Always `yield*`**: Unwrap every Effect value in generators
-- **`Effect.fn`**: Wrap RPC handlers (handles generator boilerplate)
-- **`Effect.forkScoped`**: Background tasks tied to request lifecycle
-- **`Effect.ensuring`**: Guaranteed cleanup (mailbox.end, unsubscribe)
-- **Layer.provide order**: Dependencies before dependents
+- `HttpApiBuilder.layer(Api)` from `effect/http-api` provides REST routes.
+- `RpcServer.layerHttp` from `effect/rpc` provides HTTP and WebSocket RPC routes.
+- `HttpRouter.serve` from `effect/http` serves the merged routes.
+- `BunHttpServer.layerConfig` provides the Bun HTTP server.
+- `ChatService.layer`, `SampleToolkitLive`, and `FastModelLive` provide chat.
 
 ## Configuration
 
+Copy the root `.env.example` to `apps/server/.env` and set
+`ANTHROPIC_API_KEY` before starting the server. The AI layer requires the key
+at startup, even when you only use REST or presence.
+
+
 ```typescript
 const ServerConfig = Config.all({
-  port: Config.number("PORT").pipe(Config.withDefault(9000)),
-  hostname: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
+  port: Config.Number("PORT").pipe(Config.withDefault(9000)),
+  hostname: Config.String("HOST").pipe(Config.withDefault("0.0.0.0")),
 });
 ```
 

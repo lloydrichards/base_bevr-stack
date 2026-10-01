@@ -17,8 +17,10 @@ environment variables are set and no-ops otherwise.
 
 ```typescript
 import { ObservabilityLive } from "@repo/observability";
+import { Layer } from "effect";
+import { HttpRouter } from "effect/http";
 
-const HttpLive = HttpLayerRouter.serve(Router).pipe(
+const HttpLive = HttpRouter.serve(Router).pipe(
   Layer.provideMerge(ObservabilityLive),
 );
 ```

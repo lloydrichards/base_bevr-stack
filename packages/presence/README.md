@@ -12,7 +12,7 @@ status updates, and publishes events through a PubSub.
 
 ```typescript
 import { PresenceService, ClientGenerator } from "@repo/presence";
-import { Effect } from "effect";
+import { DateTime, Effect, Layer } from "effect";
 
 const program = Effect.gen(function* () {
   const presence = yield* PresenceService;
@@ -22,9 +22,11 @@ const program = Effect.gen(function* () {
   yield* presence.addClient(clientId, {
     clientId,
     status: "online",
-    connectedAt: Date.now(),
+    connectedAt: yield* DateTime.now,
   });
-});
+}).pipe(
+  Effect.provide(Layer.mergeAll(PresenceService.layer, ClientGenerator.layer)),
+);
 ```
 
 ## Removing From Apps
@@ -33,7 +35,7 @@ const program = Effect.gen(function* () {
 
 1. Remove presence RPC wiring:
    - `apps/server/src/index.ts`: remove `PresenceService` import and the
-     `Layer.provide(PresenceService.Default)` call.
+     `Layer.provide(PresenceService.layer)` call.
 2. Remove the presence RPC implementation:
    - `apps/server/src/Rpc/Presence.ts`: delete the file.
    - `apps/server/src/index.ts`: remove `PresenceRpcLive` usage and the

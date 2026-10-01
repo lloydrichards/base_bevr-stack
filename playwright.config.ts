@@ -28,6 +28,7 @@ export default defineConfig({
   webServer: [
     {
       command: "bun run dev --filter=server",
+      env: { ANTHROPIC_API_KEY: "e2e-placeholder", DEVTOOLS: "false" },
       url: "http://localhost:9000",
       reuseExistingServer: !isCI,
       timeout: 120 * 1000,

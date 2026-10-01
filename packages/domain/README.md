@@ -21,14 +21,14 @@ generation.
 Import schemas in your apps:
 
 ```typescript
-// In client or server
 import { ApiResponse } from "@repo/domain/Api";
+import { Schema } from "effect";
 
-// Use types for API communication
-const response: ApiResponse = await fetchData();
-
-// Use schemas for validation
-const valid = Schema.decodeUnknownSync(ApiResponse)(value);
+const response: typeof ApiResponse.Type = {
+  message: "Hello bEvr!",
+  success: true,
+};
+const valid = Schema.decodeUnknownSync(ApiResponse)(response);
 ```
 
 ## Structure
@@ -43,5 +43,5 @@ src/
 
 ## Learn More
 
-- [Effect Schema Documentation](https://effect.website/docs/schema)
+- [Effect 4 Schema source](https://github.com/Effect-TS/effect/blob/main/packages/effect/src/Schema.ts)
 - [bEvr Stack Overview](../../README.md)

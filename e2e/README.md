@@ -1,59 +1,53 @@
-# E2E Tests
+# End-to-end tests
 
-End-to-end tests using Playwright.
+The Playwright suite starts the client and API, then checks REST, HTTP RPC,
+WebSocket presence, and the full-page layout. The API gets a placeholder key
+through the Playwright server configuration. Tests make no Anthropic requests.
+Browser sessions run sequentially because they share server presence state.
 
-## Running Tests
+## Run locally
 
-### Local (Quick)
+From the repository root:
 
 ```bash
-bun run test:e2e
+bun install --frozen-lockfile
+bunx playwright install chromium
+bun run test:e2e -- --reporter=list
 ```
 
-This runs tests directly on your machine. Note that visual regression tests may
-fail locally on macOS since snapshots are generated for Linux (CI environment).
+On Linux, install browser system libraries with
+`bunx playwright install chromium --with-deps`. The template CI workflow does
+this before running the unit and end-to-end suites.
 
-### Local (CI-Matching)
+Outside CI, Playwright can reuse servers already listening on ports 3000 and
+9000. Stop them first when checking a fresh build or different configuration.
 
-To run tests in the same environment as CI, use Docker:
+## Run on Linux with Docker
 
 ```bash
-# Build the Docker image (one-time, or after Playwright version updates)
 docker build -t playwright-e2e ./e2e
-
-# Run tests
-docker run --rm --ipc=host -e CI=true -v $(pwd):/work playwright-e2e
+docker run --rm --ipc=host -e CI=true -v "$(pwd):/work" \
+  -v /work/node_modules -v /work/apps/client/node_modules \
+  playwright-e2e bun run test:e2e -- --reporter=list
 ```
 
-## Visual Regression Testing
+The dependency volumes keep container dependencies separate from host
+installations. The image pins Playwright 1.63.0 and Bun 1.4.0. Keep the image
+version aligned with `@playwright/test` in the root package manifest.
 
-Visual regression tests compare screenshots against baseline images. To ensure
-consistency between local development and CI, snapshots are generated inside a
-Docker container matching the CI environment.
+## Update visual baselines
 
-### Updating Snapshots
-
-When UI changes are intentional, update the baseline snapshots:
+Inspect the failed screenshot and its diff before accepting a layout change.
+For macOS, update the baseline locally:
 
 ```bash
-# Build the Docker image (if not already built)
-docker build -t playwright-e2e ./e2e
-
-# Update snapshots
-docker run --rm --ipc=host -e CI=true -v $(pwd):/work playwright-e2e \
-  bun run test:e2e -- --update-snapshots
+bun run test:e2e -- --update-snapshots
 ```
 
-Commit the updated snapshots in `e2e/smoke.spec.ts-snapshots/`.
+For Linux, use the Docker command above with `--update-snapshots` appended.
+Commit both platform baselines in `e2e/smoke.spec.ts-snapshots/`. Run the suite
+again without the update flag to verify the saved baseline.
 
-## Docker Image
-
-The `Dockerfile` in this directory creates a consistent test environment based
-on the official Playwright image. It includes:
-
-- Playwright browsers (Chromium, Firefox, WebKit)
-- Bun runtime
-- All system dependencies
-
-The same image version is used in CI (`.github/workflows/post-merge.yml`) to
-ensure snapshot consistency.
+The visual test waits for exactly one connected client. It allows a 2% pixel
+difference for dynamic IDs and platform rendering. Functional assertions check
+the REST response, complete RPC stream, and presence status separately.

@@ -14,10 +14,11 @@ providing environment variables instead of wiring exporters per app.
 - `OTEL_SERVICE_NAME`
 
 `LOG_LEVEL` controls the minimum runtime log level for the whole Effect runtime.
-Supported values: `All`, `Trace`, `Debug`, `Info`, `Warning`, `Error`,
-`Fatal`, `None`. The parser also accepts `warn`.
+Supported values: `All`, `Trace`, `Debug`, `Info`, `Warn`, `Error`,
+`Fatal`, `None`. Values are case-sensitive.
 
-When both are set, tracing is enabled and spans are exported via OTLP over HTTP.
+When both `OTEL_EXPORTER_OTLP_ENDPOINT` and `OTEL_SERVICE_NAME` are set, the server exports traces via OTLP over HTTP. Use the full traces URL, such
+as `http://collector:4318/v1/traces`.
 If either is missing, tracing is disabled with a log message.
 
 ## Usage
@@ -26,8 +27,10 @@ Provide the layer at app startup:
 
 ```ts
 import { ObservabilityLive } from "@repo/observability";
+import { Layer } from "effect";
+import { HttpRouter } from "effect/http";
 
-const HttpLive = HttpLayerRouter.serve(Router).pipe(
+const HttpLive = HttpRouter.serve(Router).pipe(
   Layer.provideMerge(ObservabilityLive),
 );
 ```
@@ -60,5 +63,5 @@ const HttpLive = HttpLayerRouter.serve(Router).pipe(
 
 ## Learn More
 
-- [Effect OpenTelemetry](https://effect.website/docs/guides/opentelemetry)
+- [Effect OpenTelemetry source](https://github.com/Effect-TS/effect/tree/main/packages/opentelemetry)
 - [bEvr Stack Overview](../../README.md)
