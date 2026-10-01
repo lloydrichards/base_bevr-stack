@@ -1,6 +1,6 @@
 import type { ChatStreamPart } from "@repo/domain/Chat";
 import { Cause, Context, Effect, Layer, Queue, String } from "effect";
-import { Chat, Prompt } from "effect/unstable/ai";
+import { Chat, Prompt } from "effect/ai";
 import { SampleToolkit } from "../toolkits/SampleToolkit";
 import { runAgenticLoop } from "../workflow/AgenticLoop";
 

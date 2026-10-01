@@ -8,8 +8,8 @@ vi.mock("@effect/atom-react", () => ({
   useAtomSet: vi.fn(() => vi.fn()),
 }));
 
-// Mock AsyncResult from effect/unstable/reactivity
-vi.mock("effect/unstable/reactivity", () => ({
+// Mock AsyncResult from effect/reactivity
+vi.mock("effect/reactivity", () => ({
   AsyncResult: {
     getOrElse: vi.fn((_result: unknown, fallback: () => unknown) => {
       return fallback();

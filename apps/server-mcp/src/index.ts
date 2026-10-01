@@ -1,9 +1,9 @@
 import { BunHttpServer, BunRuntime } from "@effect/platform-bun";
 import { ObservabilityLive } from "@repo/observability";
 import { Config, Effect, Layer, Schema } from "effect";
-import { McpServer, Tool, Toolkit } from "effect/unstable/ai";
-import { DevTools } from "effect/unstable/devtools";
-import { HttpRouter, HttpServer } from "effect/unstable/http";
+import { McpProtocol, McpServer, Tool, Toolkit } from "effect/ai";
+import { DevTools } from "effect/devtools";
+import { HttpRouter, HttpServer } from "effect/http";
 
 // Define Resources
 const ResourceLayer = Layer.mergeAll(
@@ -65,14 +65,21 @@ const ToolLayer = McpServer.toolkit(AiTools).pipe(
 const McpLive = Layer.mergeAll(ResourceLayer, PromptLayer, ToolLayer);
 
 const ServerConfig = Config.all({
-  port: Config.number("MCP_PORT").pipe(Config.withDefault(9009)),
-  enableDevTools: Config.boolean("DEVTOOLS").pipe(Config.withDefault(false)),
+  port: Config.Number("MCP_PORT").pipe(Config.withDefault(9009)),
+  enableDevTools: Config.Boolean("DEVTOOLS").pipe(Config.withDefault(false)),
 });
 
 const McpRouter = McpServer.layerHttp({
   name: "BEVR MCP Server",
   version: "0.1.0",
   path: "/mcp",
+  protocols: [
+    McpProtocol.v2026_07_28,
+    McpProtocol.v2025_11_25,
+    McpProtocol.v2025_06_18,
+    McpProtocol.v2025_03_26,
+    McpProtocol.v2024_11_05,
+  ],
 }).pipe(
   Layer.provideMerge(McpLive),
   Layer.provide(

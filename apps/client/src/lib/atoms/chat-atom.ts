@@ -1,6 +1,6 @@
 import type { ChatMessage, ChatResponse, ToolCall } from "@repo/domain/Chat";
 import { Effect, Stream } from "effect";
-import type { Atom } from "effect/unstable/reactivity";
+import type { Atom } from "effect/reactivity";
 import { runtime } from "../atom";
 import { RpcClient } from "../rpc-client";
 
@@ -19,9 +19,9 @@ export const chatAtom: Atom.AtomResultFn<
       Effect.logError("[chatAtom] Stream error occurred:", error),
     ),
     Stream.scan(
-      {
+      (): ChatResponse => ({
         _tag: "initial",
-      },
+      }),
       (state, part): ChatResponse => {
         switch (part._tag) {
           case "text-delta": {

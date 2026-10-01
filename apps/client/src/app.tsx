@@ -42,6 +42,7 @@ function App() {
       <footer className="w-full flex justify-between">
         <Button
           variant="link"
+          nativeButton={false}
           render={(props) => (
             <a
               {...props}
@@ -55,6 +56,7 @@ function App() {
         />
         <Button
           variant="link"
+          nativeButton={false}
           render={(props) => (
             <a
               {...props}

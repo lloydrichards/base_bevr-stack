@@ -1,9 +1,5 @@
 import { Schema } from "effect";
-import {
-  HttpApi,
-  HttpApiEndpoint,
-  HttpApiGroup,
-} from "effect/unstable/httpapi";
+import { HttpApi, HttpApiEndpoint, HttpApiGroup } from "effect/http-api";
 
 export const ApiResponse = Schema.Struct({
   message: Schema.String,

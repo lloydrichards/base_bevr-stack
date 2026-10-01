@@ -1,7 +1,7 @@
 import { ChatService } from "@repo/ai";
 import { EventRpc, type TickEvent } from "@repo/domain/Rpc";
-import { Effect, Queue } from "effect";
-import { Prompt } from "effect/unstable/ai";
+import { type Cause, Effect, Queue } from "effect";
+import { Prompt } from "effect/ai";
 
 export const EventRpcLive = EventRpc.toLayer(
   Effect.gen(function* () {
@@ -10,7 +10,10 @@ export const EventRpcLive = EventRpc.toLayer(
     return EventRpc.of({
       tick: Effect.fn(function* (payload) {
         yield* Effect.logDebug("Creating new tick stream");
-        const queue = yield* Queue.unbounded<typeof TickEvent.Type>();
+        const queue = yield* Queue.unbounded<
+          typeof TickEvent.Type,
+          Cause.Done
+        >();
         yield* Effect.forkScoped(
           Effect.gen(function* () {
             yield* Queue.offer(queue, { _tag: "starting" });
@@ -21,7 +24,7 @@ export const EventRpcLive = EventRpc.toLayer(
             }
             yield* Queue.offer(queue, { _tag: "end" });
             yield* Effect.logDebug("End event sent");
-          }).pipe(Effect.ensuring(Queue.shutdown(queue))),
+          }).pipe(Effect.ensuring(Queue.end(queue))),
         );
         return queue;
       }),

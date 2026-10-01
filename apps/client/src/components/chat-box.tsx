@@ -1,6 +1,6 @@
 import { useAtom } from "@effect/atom-react";
 import type { ChatResponse, MessageSegment } from "@repo/domain/Chat";
-import { AsyncResult } from "effect/unstable/reactivity";
+import { AsyncResult } from "effect/reactivity";
 import { AlertCircle, Loader2, Send } from "lucide-react";
 import { type FC, useEffect, useMemo, useRef, useState } from "react";
 import { chatAtom } from "@/lib/atoms/chat-atom";

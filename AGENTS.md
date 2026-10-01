@@ -20,8 +20,8 @@
 
 ## Tech Stack
 
-Bun 1.2+, TypeScript 5.9, Effect 4-beta, React 19, Vite 8, Vitest 4, Tailwind CSS
-4, Biome 2.4
+Bun 1.4+, TypeScript 7, Effect 4, React 19, Vite 8, Vitest 5, Tailwind CSS
+4, Biome 2.5
 
 ## Code Style
 
@@ -68,10 +68,21 @@ commits in these repos to ensure the LLM references current code:
 If any of the folders are missing (they are git ignored), clone them into
 `reference/`:
 
-- `https://github.com/Effect-TS/effect-smol.git` -> `.reference/effect/`
+- `https://github.com/Effect-TS/effect.git` -> `.reference/effect/`
 - `https://github.com/Effect-TS/effect-atom.git` -> `.reference/effect-atom/`
 
 ---
 
 _This document is a living guide. Update it as the project evolves and new
 patterns emerge._
+
+<!-- BEGIN:turborepo-agent-rules -->
+
+# This is NOT the Turborepo you know
+
+Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
+
+Read `docs/README.md` inside that installed package first, then read the relevant pages from its `docs/` directory before changing Turborepo configuration or commands. Heed deprecation notices. These bundled docs match the installed package version and are available without network access.
+
+This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
+<!-- END:turborepo-agent-rules -->

@@ -6,10 +6,10 @@ import { WebSocketRpc } from "@repo/domain/WebSocket";
 import { ObservabilityLive } from "@repo/observability";
 import { PresenceService } from "@repo/presence";
 import { Config, Effect, Layer } from "effect";
-import { DevTools } from "effect/unstable/devtools";
-import { HttpRouter, HttpServer } from "effect/unstable/http";
-import { HttpApiBuilder } from "effect/unstable/httpapi";
-import { RpcSerialization, RpcServer } from "effect/unstable/rpc";
+import { DevTools } from "effect/devtools";
+import { HttpRouter, HttpServer } from "effect/http";
+import { HttpApiBuilder } from "effect/http-api";
+import { RpcSerialization, RpcServer } from "effect/rpc";
 import { HealthGroupLive } from "./Api/Health";
 import { HelloGroupLive } from "./Api/Hello";
 import { EventRpcLive } from "./Rpc/Event";
@@ -20,13 +20,13 @@ import { PresenceRpcLive } from "./Rpc/Presence";
 // ============================================================================
 
 const ServerConfig = Config.all({
-  port: Config.number("PORT").pipe(Config.withDefault(9000)),
-  hostname: Config.string("HOST").pipe(Config.withDefault("0.0.0.0")),
-  idleTimeout: Config.number("IDLE_TIMEOUT").pipe(Config.withDefault(120)), // seconds (Bun default is 10)
-  allowedOrigins: Config.string("ALLOWED_ORIGINS").pipe(
+  port: Config.Number("PORT").pipe(Config.withDefault(9000)),
+  hostname: Config.String("HOST").pipe(Config.withDefault("0.0.0.0")),
+  idleTimeout: Config.Number("IDLE_TIMEOUT").pipe(Config.withDefault(120)), // seconds (Bun default is 10)
+  allowedOrigins: Config.String("ALLOWED_ORIGINS").pipe(
     Config.withDefault("http://localhost:3000"),
   ),
-  enableDevTools: Config.boolean("DEVTOOLS").pipe(Config.withDefault(false)),
+  enableDevTools: Config.Boolean("DEVTOOLS").pipe(Config.withDefault(false)),
 });
 
 // ============================================================================
