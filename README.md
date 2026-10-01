@@ -36,7 +36,7 @@ The flake provides bun, node, and corepack.
 
 ### Manual setup
 
-If you prefer not to use Nix, ensure you have [Bun 1.2+](https://bun.sh/) and
+If you prefer not to use Nix, ensure you have [Bun 1.4+](https://bun.sh/) and
 [Node.js 24+](https://nodejs.org/) installed.
 
 ```bash
@@ -55,7 +55,7 @@ bun run build
 
 ### Formatting and Linting
 
-Format and lint the codebase using Ultracite:
+Format and lint the codebase using Biome:
 
 ```bash
 # Format code
@@ -89,8 +89,8 @@ bun run test:e2e -- --update-snapshots
 
 ### Test Stack
 
-- **Client**: Vitest 4.x with Browser Mode (Playwright), vitest-browser-react
-- **Server**: Vitest 4.x with Node environment, @effect/vitest
+- **Client**: Vitest 5.x with Browser Mode (Playwright), vitest-browser-react
+- **Server**: Vitest 5.x with Node environment, @effect/vitest
 - **E2E**: Playwright with visual regression testing
 
 ### CI/CD Workflows

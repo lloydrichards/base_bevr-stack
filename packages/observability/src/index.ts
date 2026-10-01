@@ -5,7 +5,7 @@ import { Config, Effect, Layer, Option, References } from "effect";
 
 export const Observability = NodeSdk;
 
-const LogLevelConfig = Config.logLevel("LOG_LEVEL").pipe(
+const LogLevelConfig = Config.LogLevel("LOG_LEVEL").pipe(
   Config.withDefault("Info"),
 );
 
@@ -15,8 +15,8 @@ export const LogLevelLive = Effect.gen(function* () {
 }).pipe(Layer.unwrap);
 
 const TracingConfig = Config.all({
-  exporterEndpoint: Config.option(Config.string("OTEL_EXPORTER_OTLP_ENDPOINT")),
-  serviceName: Config.option(Config.string("OTEL_SERVICE_NAME")),
+  exporterEndpoint: Config.option(Config.String("OTEL_EXPORTER_OTLP_ENDPOINT")),
+  serviceName: Config.option(Config.String("OTEL_SERVICE_NAME")),
 });
 
 const TracingLive = Effect.gen(function* () {

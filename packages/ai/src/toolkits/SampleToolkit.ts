@@ -1,5 +1,5 @@
 import { Data, DateTime, Effect, Schema } from "effect";
-import { Tool, Toolkit } from "effect/unstable/ai";
+import { Tool, Toolkit } from "effect/ai";
 
 class CalculatorError extends Data.TaggedError("CalculatorError")<{
   readonly message: string;

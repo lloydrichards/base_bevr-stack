@@ -1,6 +1,6 @@
 import type { TickEvent } from "@repo/domain/Rpc";
 import { Effect, Stream } from "effect";
-import type { Atom } from "effect/unstable/reactivity";
+import type { Atom } from "effect/reactivity";
 import { runtime } from "../atom";
 import { RpcClient } from "../rpc-client";
 

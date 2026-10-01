@@ -2,12 +2,8 @@ import { BrowserSocket } from "@effect/platform-browser";
 import type { WebSocketEvent } from "@repo/domain/WebSocket";
 import { WebSocketRpc } from "@repo/domain/WebSocket";
 import { type Cause, Effect, Layer, Stream } from "effect";
-import { type Atom, AtomRpc } from "effect/unstable/reactivity";
-import {
-  RpcClient,
-  type RpcClientError,
-  RpcSerialization,
-} from "effect/unstable/rpc";
+import { type Atom, AtomRpc } from "effect/reactivity";
+import { RpcClient, type RpcClientError, RpcSerialization } from "effect/rpc";
 
 const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:9000/ws";
 
@@ -38,10 +34,13 @@ export const presenceSubscriptionAtom: Atom.AtomResultFn<
     Effect.map((stream) =>
       stream.pipe(
         // Cap event accumulation at 100 to prevent memory growth in long sessions
-        Stream.scan<WebSocketEvent[], WebSocketEvent>([], (acc, event) => {
-          const updated = [...acc, event];
-          return updated.length > 100 ? updated.slice(-100) : updated;
-        }),
+        Stream.scan<WebSocketEvent[], WebSocketEvent>(
+          () => [],
+          (acc, event) => {
+            const updated = [...acc, event];
+            return updated.length > 100 ? updated.slice(-100) : updated;
+          },
+        ),
       ),
     ),
     Stream.unwrap,

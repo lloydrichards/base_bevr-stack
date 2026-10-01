@@ -9,7 +9,7 @@ import {
   SchemaGetter,
   Stream,
 } from "effect";
-import type { Chat, Tool, Toolkit } from "effect/unstable/ai";
+import type { Chat, Tool, Toolkit } from "effect/ai";
 import { createMailboxEvents } from "./MailboxEvents";
 
 export const AgenticLoopState = Schema.Struct({
@@ -40,7 +40,7 @@ const loop = Effect.fn("loop")(function* <
   queue,
   toolkit,
 }: {
-  chat: Chat.Service;
+  chat: Chat.Chat;
   queue: Queue.Queue<typeof ChatStreamPart.Type, Cause.Done>;
   toolkit: Toolkit.WithHandler<Tools>;
 }) {
@@ -207,7 +207,7 @@ export const runAgenticLoop = Effect.fn("runAgenticLoop")(function* <
   toolkit,
   maxIterations = 12,
 }: {
-  chat: Chat.Service;
+  chat: Chat.Chat;
   queue: Queue.Queue<typeof ChatStreamPart.Type, Cause.Done>;
   toolkit: Toolkit.WithHandler<Tools>;
   maxIterations?: number;
