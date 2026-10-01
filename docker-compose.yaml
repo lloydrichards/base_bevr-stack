@@ -5,13 +5,14 @@ services:
       context: .
       dockerfile: ./apps/server/Dockerfile
     environment:
-      PORT: ${SERVER_PORT:-9000}
+      PORT: 9000
       HOST: 0.0.0.0
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?Set ANTHROPIC_API_KEY in .env}
       ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
       OTEL_SERVICE_NAME: bevr-server
-    expose:
-      - "${SERVER_PORT:-9000}"
+    ports:
+      - "${SERVER_PORT:-9000}:9000"
     networks:
       - app-network
 
@@ -20,11 +21,11 @@ services:
       context: .
       dockerfile: ./apps/server-mcp/Dockerfile
     environment:
-      MCP_PORT: ${MCP_PORT:-8000}
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      MCP_PORT: 9009
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318/v1/traces
       OTEL_SERVICE_NAME: bevr-server-mcp
-    expose:
-      - "${MCP_PORT:-8000}"
+    ports:
+      - "${MCP_PORT:-9009}:9009"
     networks:
       - app-network
 
@@ -33,10 +34,10 @@ services:
       context: .
       dockerfile: ./apps/client/Dockerfile
       args:
-        SERVER_URL: ${SERVER_URL:-http://localhost:${SERVER_PORT:-9000}}
-        CLIENT_PORT: ${CLIENT_PORT:-3000}
+        VITE_SERVER_URL: ${VITE_SERVER_URL:-http://localhost:${SERVER_PORT:-9000}}
+        VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:${SERVER_PORT:-9000}/ws}
     ports:
-      - "${CLIENT_PORT:-3000}:${CLIENT_PORT:-3000}"
+      - "${CLIENT_PORT:-3000}:80"
     networks:
       - app-network
     depends_on:
@@ -47,19 +48,16 @@ services:
     image: otel/opentelemetry-collector-contrib:0.116.1
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
-      - ./support/otel-collector-config.yaml:/etc/otel-collector-config.yaml
-    expose:
-      - "4317"
-      - "4318"
+      - ./support/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     networks:
       - app-network
 
   jaeger:
     image: jaegertracing/all-in-one:1.63.0
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
     ports:
       - "16686:16686"
-    expose:
-      - "14250"
     networks:
       - app-network
 

@@ -1,43 +1,15 @@
-FROM oven/bun:alpine AS base
-RUN apk update && apk add --no-cache jq libc6-compat
+FROM oven/bun:1.4.0 AS builder
 WORKDIR /app
+COPY . .
+RUN bun install --frozen-lockfile
+ARG VITE_SERVER_URL=http://localhost:9000
+ARG VITE_WS_URL=ws://localhost:9000/ws
+ENV VITE_SERVER_URL=${VITE_SERVER_URL}
+ENV VITE_WS_URL=${VITE_WS_URL}
+RUN bun run build --filter=client
 
-# Step 1: Install dependencies only when needed
-FROM base AS pruner
-WORKDIR /app
-COPY --chown=node:node . .
-RUN bun add turbo --global
-RUN turbo prune client --docker
-
-# Step 2: Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-
-ARG SERVER_URL
-ARG SERVER_HOST=localhost
-ARG SERVER_PORT=9000
-ARG CLIENT_PORT=3000
-ENV VITE_SERVER_URL=${SERVER_URL:-http://${SERVER_HOST}:${SERVER_PORT}}
-
-
-COPY --from=pruner /app/out/json/ .
-COPY --from=pruner /app/out/full/ .
-
-RUN bun install
-RUN bun run build --filter=client...
-
-# Step 3: Production image, copy all the files and run next
 FROM nginx:mainline-alpine AS runner
-WORKDIR /app
-
-# Spawns command as a child process.
-RUN apk update && apk add --no-cache tini
-
-COPY --from=pruner /app/support/nginx-spa.conf /etc/nginx/conf.d/default.conf
-RUN sed -i "s/\${CLIENT_PORT}/${CLIENT_PORT}/g" /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/apps/client/dist ./
-
-EXPOSE ${CLIENT_PORT}
-
-ENTRYPOINT ["/sbin/tini", "--"]
+COPY support/nginx-spa.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/apps/client/dist /usr/share/nginx/html
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

@@ -1,7 +1,7 @@
 # @repo/ai
 
 Shared AI tooling for the [bEvr stack](../../README.md), built with Effect and
-@effect/ai.
+`effect/ai` and `@effect/ai-anthropic`.
 
 ## Overview
 
@@ -12,6 +12,10 @@ streams events, and sample toolkits for agentic workflows.
 
 - `ANTHROPIC_API_KEY`
 
+The server requires this key at startup. Copy `.env.example` to `.env` at the
+repository root and set the key before running `bun run dev`. For commands
+started inside `apps/server`, use `apps/server/.env` or exported variables.
+
 ## Usage
 
 ```typescript
@@ -20,7 +24,7 @@ import { Layer } from "effect";
 
 const AiLive = Layer.mergeAll(FastModelLive, SampleToolkitLive);
 
-const AppLive = ChatService.Default.pipe(Layer.provideMerge(AiLive));
+const AppLive = ChatService.layer.pipe(Layer.provideMerge(AiLive));
 ```
 
 ## Removing From Apps
@@ -32,10 +36,11 @@ const AppLive = ChatService.Default.pipe(Layer.provideMerge(AiLive));
      `SampleToolkitLive` imports and `Layer.provide(...)` calls.
 2. Remove the chat RPC handler:
    - `apps/server/src/Rpc/Event.ts`: remove the `chat` handler (and the
-     `@effect/ai` `Prompt` import if unused).
-3. Remove AI dependencies:
-   - `apps/server/package.json`: remove `@repo/ai` (and any unused `@effect/ai`
-     entries if no longer needed).
+     `effect/ai` `Prompt` import if unused).
+3. Remove `Rpc.make("chat", ...)` and the `./Chat` imports from
+   `packages/domain/src/Rpc.ts`. Both client and server use this RPC group.
+4. Remove AI dependencies:
+   - `apps/server/package.json`: remove `@repo/ai`.
 
 ### Client
 
@@ -50,5 +55,5 @@ const AppLive = ChatService.Default.pipe(Layer.provideMerge(AiLive));
 
 ## Learn More
 
-- [@effect/ai Documentation](https://github.com/tim-smart/effect-io-ai)
+- [Effect AI source](https://github.com/Effect-TS/effect/tree/main/packages/effect/src/ai)
 - [bEvr Stack Overview](../../README.md)

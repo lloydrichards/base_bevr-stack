@@ -1,0 +1,28 @@
+name: Check - Template
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: All workspaces
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Install Chromium
+        run: bunx playwright install chromium --with-deps
+      - run: bun run lint
+      - run: bun run format:check
+      - run: bun run type-check
+      - run: bun run test
+      - run: bun run build
+      - name: End-to-end and visual tests
+        run: bun run test:e2e -- --reporter=list

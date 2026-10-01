@@ -13,23 +13,23 @@ Shared schemas, types, and RPC definitions used by both client and server.
 export const ClientId = Schema.String.pipe(Schema.brand("ClientId"));
 
 // 2. Literal unions for enums
-export const ClientStatus = Schema.Literal("online", "away", "busy");
+export const ClientStatus = Schema.Literals(["online", "away", "busy"]);
 export type ClientStatus = Schema.Schema.Type<typeof ClientStatus>;
 
 // 3. Struct schemas with type export
 export const ClientInfo = Schema.Struct({
   clientId: ClientId,
   status: ClientStatus,
-  connectedAt: Schema.Number,
+  connectedAt: Schema.DateTimeUtc,
 });
 export type ClientInfo = Schema.Schema.Type<typeof ClientInfo>;
 
 // 4. Tagged unions for events (discriminated by _tag)
-export const MyEvent = Schema.Union(
+export const MyEvent = Schema.Union([
   Schema.TaggedStruct("started", { timestamp: Schema.Number }),
   Schema.TaggedStruct("completed", { result: Schema.String }),
   Schema.TaggedStruct("failed", { error: Schema.String })
-);
+]);
 ```
 
 ## Type Export Convention
@@ -41,7 +41,7 @@ export const MySchema = Schema.Struct({
 });
 export type MySchema = Schema.Schema.Type<typeof MySchema>;
 
-// For inline usage (not exported): typeof Schema.Type
+// For inline usage: typeof MySchema.Type
 const data: typeof ApiResponse.Type = { message: "Hello", success: true };
 ```
 
@@ -50,7 +50,7 @@ const data: typeof ApiResponse.Type = { message: "Hello", success: true };
 ```typescript
 // HTTP API endpoints
 export class HelloGroup extends HttpApiGroup.make("hello")
-  .add(HttpApiEndpoint.get("get", "/").addSuccess(ApiResponse))
+  .add(HttpApiEndpoint.get("get", "/", { success: ApiResponse }))
   .prefix("/hello") {}
 
 export const Api = HttpApi.make("Api").add(HelloGroup);
